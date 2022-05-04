@@ -1,6 +1,7 @@
 package com.codecool.Forum.service;
 
 import com.codecool.Forum.exception.QuestionNotFoundException;
+import com.codecool.Forum.model.OrderBy;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.reporsitory.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,15 @@ public class QuestionService {
         this.questionRepository = questionRepository;
     }
 
-    public List<Question> getAllQuestions() {
-        return questionRepository.findAll(Sort.by(Sort.Direction.ASC, "createdOn"));
+    public List<Question> getAllQuestions(String orderBy, String orderDirection) {
+        Sort sort;
+        if (orderBy == null || orderDirection == null) {
+            sort = Sort.by(Sort.Direction.DESC, "createdOn");
+        } else {
+            sort = Sort.by(Sort.Direction.valueOf(orderDirection),
+                    OrderBy.valueOf(orderBy).getFieldName());
+        }
+        return questionRepository.findAll(sort);
     }
 
     public Question getQuestionById(Long id) {
