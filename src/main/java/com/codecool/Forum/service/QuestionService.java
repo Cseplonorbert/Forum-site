@@ -32,7 +32,8 @@ public class QuestionService {
         throw new QuestionNotFoundException("Question not found");
     }
 
-    public Question addQuestion(Question question) {
+    public Question addQuestion(String title, String description) {
+        Question question = Question.builder().title(title).description(description).build();
         return questionRepository.save(question);
     }
 }
