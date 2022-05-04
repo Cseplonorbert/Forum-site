@@ -26,7 +26,7 @@ public class Question {
 
     private String description;
 
-    @OneToMany(mappedBy = "question")
+    @OneToMany(mappedBy = "question", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     List<Answer> answers;
 
     @Builder.Default private int viewed = 0;

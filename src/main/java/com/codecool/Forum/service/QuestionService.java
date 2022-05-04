@@ -44,4 +44,9 @@ public class QuestionService {
         Question question = Question.builder().title(title).description(description).build();
         return questionRepository.save(question);
     }
+
+    public void deleteQuestionById(Long id) {
+        Question question = getQuestionById(id);
+        questionRepository.delete(question);
+    }
 }
