@@ -31,4 +31,8 @@ public class QuestionService {
         }
         throw new QuestionNotFoundException("Question not found");
     }
+
+    public Question addQuestion(Question question) {
+        return questionRepository.save(question);
+    }
 }
