@@ -1,13 +1,11 @@
 package com.codecool.Forum.model;
 
-import javax.persistence.*;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Entity
 @Getter
@@ -15,21 +13,19 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "QUESTION")
-public class Question {
+@Table(name = "ANSWERS")
+public class Answer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    private String title;
+    private String message;
 
-    private String description;
-
-    @OneToMany(mappedBy = "question")
-    List<Answer> answers;
-
-    @Builder.Default private int viewed = 0;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
 
     @JsonIgnore
     @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
