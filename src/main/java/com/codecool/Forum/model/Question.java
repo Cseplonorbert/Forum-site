@@ -1,10 +1,13 @@
 package com.codecool.Forum.model;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Entity
 @Getter
@@ -12,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "QUESTION")
 public class Question {
 
     @Id
@@ -22,8 +26,12 @@ public class Question {
 
     private String description;
 
+    @OneToMany(mappedBy = "question")
+    List<Answer> answers;
+
     @Builder.Default private int viewed = 0;
 
+    @JsonIgnore
     @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
     @Builder.Default private String formattedDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 }
