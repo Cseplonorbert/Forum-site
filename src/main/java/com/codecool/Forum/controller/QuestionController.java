@@ -25,9 +25,15 @@ public class QuestionController {
         this.answerService = answerService;
     }
 
-    @GetMapping
-    public List<Question> getAllQuestions() {
-        return questionService.getAllQuestions();
+    @GetMapping("/list")
+    public List<Question> getAllQuestions(@RequestParam(required = false, name = "order_by") String orderBy,
+                                          @RequestParam(required = false, name = "order_direction") String orderDirection) {
+        try {
+            return questionService.getAllQuestions(orderBy, orderDirection);
+        } catch (IllegalArgumentException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Invalid Sorting Query", exc);
+        }
     }
 
     @GetMapping("/question/{question_id}")
