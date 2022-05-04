@@ -5,10 +5,8 @@ import com.codecool.Forum.model.Question;
 import com.codecool.Forum.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -38,5 +36,10 @@ public class QuestionController {
                     HttpStatus.NOT_FOUND, "Question Not Found", exc
             );
         }
+    }
+
+    @PostMapping("add-question")
+    public ResponseEntity<Question> addQuestion(@RequestParam String title, @RequestParam String description) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(questionService.addQuestion(title, description));
     }
 }
