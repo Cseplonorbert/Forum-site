@@ -27,13 +27,18 @@ public class AnswerService {
         answerRepository.save(answer);
     }
 
-    public Question deleteAnswer(Long id) {
+    public Answer getAnswerById(Long id) {
         Optional<Answer> answer = answerRepository.findById(id);
         if (answer.isPresent()) {
-            Question question = answer.get().getQuestion();
-            answerRepository.delete(answer.get());
-            return question;
+            return answer.get();
         }
         throw new AnswerNotFoundException("Answer Not Found");
+    }
+
+    public Question deleteAnswer(Long id) {
+        Answer answer = getAnswerById(id);
+        Question question = answer.getQuestion();
+        answerRepository.delete(answer);
+        return question;
     }
 }
