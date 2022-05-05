@@ -1,7 +1,6 @@
 package com.codecool.Forum.controller;
 
 import com.codecool.Forum.exception.QuestionNotFoundException;
-import com.codecool.Forum.model.Answer;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.service.AnswerService;
 import com.codecool.Forum.service.QuestionService;
@@ -71,6 +70,19 @@ public class QuestionController {
         try {
             questionService.deleteQuestionById(question_id);
             return ResponseEntity.noContent().build();
+        } catch (QuestionNotFoundException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
+            );
+        }
+    }
+
+    @PutMapping("/question/{question_id}/edit")
+    public ResponseEntity<Question> updateQuestion(@PathVariable Long question_id, @RequestParam String title,
+                                                   @RequestParam String description) {
+        try {
+            Question question = questionService.updateQuestion(question_id, title, description);
+            return ResponseEntity.status(HttpStatus.OK).body(question);
         } catch (QuestionNotFoundException exc) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, exc.getMessage(), exc
