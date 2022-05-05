@@ -89,4 +89,17 @@ public class QuestionController {
             );
         }
     }
+
+    @PutMapping("/question/{question_id}/vote")
+    public ResponseEntity<Question> voteOnQuestion(@PathVariable Long question_id,
+                                                     @RequestParam(name = "vote_method") String vote) {
+        try {
+            Question question = questionService.voteOnQuestion(question_id, vote);
+            return ResponseEntity.status(HttpStatus.OK).body(question);
+        } catch (QuestionNotFoundException | IllegalArgumentException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
+            );
+        }
+    }
 }
