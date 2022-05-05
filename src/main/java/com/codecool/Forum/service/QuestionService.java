@@ -3,6 +3,7 @@ package com.codecool.Forum.service;
 import com.codecool.Forum.exception.QuestionNotFoundException;
 import com.codecool.Forum.model.OrderBy;
 import com.codecool.Forum.model.Question;
+import com.codecool.Forum.model.Vote;
 import com.codecool.Forum.reporsitory.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -54,6 +55,13 @@ public class QuestionService {
         Question question = getQuestionById(id);
         question.setTitle(title);
         question.setDescription(description);
+        return questionRepository.save(question);
+    }
+
+    public Question voteOnQuestion(Long id, String vote) {
+        Question question = getQuestionById(id);
+        Vote voteDir = Vote.valueOf(vote);
+        question.setNumberOfVotes(question.getNumberOfVotes() + voteDir.getValue());
         return questionRepository.save(question);
     }
 }
