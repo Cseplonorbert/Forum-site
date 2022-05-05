@@ -49,4 +49,11 @@ public class QuestionService {
         Question question = getQuestionById(id);
         questionRepository.delete(question);
     }
+
+    public Question updateQuestion(Long id, String title, String description) {
+        Question question = getQuestionById(id);
+        question.setTitle(title);
+        question.setDescription(description);
+        return questionRepository.save(question);
+    }
 }
