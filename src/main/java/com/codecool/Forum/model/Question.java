@@ -31,6 +31,8 @@ public class Question {
 
     @Builder.Default private int viewed = 0;
 
+    @Builder.Default private int numberOfVotes = 0;
+
     @JsonIgnore
     @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
     @Builder.Default private String formattedDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
