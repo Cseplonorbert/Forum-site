@@ -25,6 +25,11 @@ public class Comment {
     @JoinColumn(name = "question_id")
     private Question question;
 
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "answer_id")
+    private Answer answer;
+
     @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
 
 }
