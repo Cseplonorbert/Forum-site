@@ -30,6 +30,9 @@ public class Comment {
     @JoinColumn(name = "answer_id")
     private Answer answer;
 
+    @Builder.Default private int editedNumberOfTimes = 0;
+    @Builder.Default private boolean edited = false;
+
     @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
 
 }
