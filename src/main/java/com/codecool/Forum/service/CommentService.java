@@ -1,5 +1,6 @@
 package com.codecool.Forum.service;
 
+import com.codecool.Forum.model.Answer;
 import com.codecool.Forum.model.Comment;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.reporsitory.CommentRepository;
@@ -21,6 +22,13 @@ public class CommentService {
                 .message(message)
                 .question(question)
                 .build();
+        commentRepository.save(comment);
+    }
+
+    public void addNewComment(Answer answer, String message) {
+        Comment comment = Comment.builder()
+                .message(message)
+                .answer(answer).build();
         commentRepository.save(comment);
     }
 }
