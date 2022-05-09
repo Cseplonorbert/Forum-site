@@ -3,6 +3,7 @@ package com.codecool.Forum.controller;
 import com.codecool.Forum.exception.QuestionNotFoundException;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.service.AnswerService;
+import com.codecool.Forum.service.CommentService;
 import com.codecool.Forum.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,11 +19,14 @@ public class QuestionController {
 
     QuestionService questionService;
     AnswerService answerService;
+    CommentService commentService;
 
     @Autowired
-    public QuestionController(QuestionService questionService, AnswerService answerService) {
+    public QuestionController(QuestionService questionService, AnswerService answerService,
+                              CommentService commentService) {
         this.questionService = questionService;
         this.answerService = answerService;
+        this.commentService = commentService;
     }
 
     @GetMapping("/list")
@@ -97,6 +101,20 @@ public class QuestionController {
             Question question = questionService.voteOnQuestion(question_id, vote);
             return ResponseEntity.status(HttpStatus.OK).body(question);
         } catch (QuestionNotFoundException | IllegalArgumentException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
+            );
+        }
+    }
+
+    @PostMapping("/question/{question_id}/new-comment")
+    public ResponseEntity<Question> addComment(@RequestParam String message,
+                                               @PathVariable Long question_id) {
+        try {
+            Question question = questionService.getQuestionById(question_id);
+            commentService.addNewComment(question, message);
+            return ResponseEntity.status(HttpStatus.CREATED).body(question);
+        } catch (QuestionNotFoundException exc) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, exc.getMessage(), exc
             );

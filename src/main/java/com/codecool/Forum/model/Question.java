@@ -29,6 +29,9 @@ public class Question {
     @OneToMany(mappedBy = "question", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     List<Answer> answers;
 
+    @OneToMany(mappedBy = "question", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    List<Comment> comments;
+
     @Builder.Default private int viewed = 0;
 
     @Builder.Default private int numberOfVotes = 0;
