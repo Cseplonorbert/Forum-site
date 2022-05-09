@@ -8,6 +8,7 @@ import com.codecool.Forum.reporsitory.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -41,5 +42,18 @@ public class CommentService {
                 .message(message)
                 .answer(answer).build();
         commentRepository.save(comment);
+    }
+
+    public Question update(Long id, String message) {
+        Comment comment = findCommentById(id);
+        comment.setMessage(message);
+        comment.setEditedNumberOfTimes(comment.getEditedNumberOfTimes() + 1);
+        comment.setEdited(true);
+        comment.setCreatedOn(LocalDateTime.now());
+        commentRepository.save(comment);
+        if (comment.getQuestion() != null) {
+            return comment.getQuestion();
+        }
+        return comment.getAnswer().getQuestion();
     }
 }
