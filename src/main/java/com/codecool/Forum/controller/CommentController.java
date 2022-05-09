@@ -1,6 +1,6 @@
 package com.codecool.Forum.controller;
 
-import com.codecool.Forum.exception.AnswerNotFoundException;
+import com.codecool.Forum.exception.CommentNotFoundException;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.service.CommentService;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,19 @@ public class CommentController {
         try {
             Question question = commentService.update(comment_id,message);
             return ResponseEntity.status(HttpStatus.OK).body(question);
-        } catch (AnswerNotFoundException exc) {
+        } catch (CommentNotFoundException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
+            );
+        }
+    }
+
+    @DeleteMapping("/{comment_id}/delete")
+    public ResponseEntity<Question> delete(@PathVariable Long comment_id) {
+        try {
+            Question question = commentService.delete(comment_id);
+            return ResponseEntity.status(HttpStatus.OK).body(question);
+        } catch (CommentNotFoundException exc) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, exc.getMessage(), exc
             );

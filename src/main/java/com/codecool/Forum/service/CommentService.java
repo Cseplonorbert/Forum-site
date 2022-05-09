@@ -51,6 +51,16 @@ public class CommentService {
         comment.setEdited(true);
         comment.setCreatedOn(LocalDateTime.now());
         commentRepository.save(comment);
+        return getQuestion(comment);
+    }
+
+    public Question delete(Long id) {
+        Comment comment = findCommentById(id);
+        commentRepository.delete(comment);
+        return getQuestion(comment);
+    }
+
+    private Question getQuestion(Comment comment) {
         if (comment.getQuestion() != null) {
             return comment.getQuestion();
         }
