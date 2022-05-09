@@ -27,6 +27,8 @@ public class Answer {
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
+    @Builder.Default private int numberOfVotes = 0;
+
     @JsonIgnore
     @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
     @Builder.Default private String formattedDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
