@@ -48,4 +48,11 @@ public class AnswerService {
         answer.setNumberOfVotes(answer.getNumberOfVotes() + voteDir.getValue());
         return answer.getQuestion();
     }
+
+    public Question update(Long id, String message) {
+        Answer answer = getAnswerById(id);
+        answer.setMessage(message);
+        answerRepository.save(answer);
+        return answer.getQuestion();
+    }
 }
