@@ -62,4 +62,17 @@ public class AnswerController {
             );
         }
     }
+
+    @PutMapping("/{answer_id}/edit")
+    public ResponseEntity<Question> update(@PathVariable Long answer_id,
+                                           @RequestParam String message) {
+        try {
+            Question question = answerService.update(answer_id, message);
+            return ResponseEntity.status(HttpStatus.OK).body(question);
+        } catch (AnswerNotFoundException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
+            );
+        }
+    }
 }
