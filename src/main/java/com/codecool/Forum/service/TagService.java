@@ -1,6 +1,7 @@
 package com.codecool.Forum.service;
 
 import com.codecool.Forum.exception.TagAlreadyAddedToQuestionException;
+import com.codecool.Forum.exception.TagNotFoundException;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.model.Tag;
 import com.codecool.Forum.reporsitory.TagRepository;
@@ -22,6 +23,14 @@ public class TagService {
 
     public Optional<Tag> getTagByName(String tagName) {
         return tagRepository.findByName(tagName);
+    }
+
+    public Tag getTagById(Long id) {
+        Optional<Tag> tag = tagRepository.findById(id);
+        if (tag.isPresent()) {
+            return tag.get();
+        }
+        throw new TagNotFoundException("Tag not found");
     }
 
     public void add(String tagName, Question question) {
