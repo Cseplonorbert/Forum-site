@@ -33,7 +33,7 @@ public class Question {
     @OneToMany(mappedBy = "question", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     List<Comment> comments;
 
-    @ManyToMany(mappedBy = "question")
+    @ManyToMany(mappedBy = "questions")
     List<Tag> tags = new ArrayList<>();
 
     @Builder.Default private int viewed = 0;
