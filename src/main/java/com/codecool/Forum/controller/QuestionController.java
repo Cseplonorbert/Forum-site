@@ -2,7 +2,10 @@ package com.codecool.Forum.controller;
 
 import com.codecool.Forum.exception.QuestionNotFoundException;
 import com.codecool.Forum.exception.TagAlreadyAddedToQuestionException;
+import com.codecool.Forum.exception.TagNotBeenAddedToQuestionException;
+import com.codecool.Forum.exception.TagNotFoundException;
 import com.codecool.Forum.model.Question;
+import com.codecool.Forum.model.Tag;
 import com.codecool.Forum.service.AnswerService;
 import com.codecool.Forum.service.CommentService;
 import com.codecool.Forum.service.QuestionService;
@@ -139,6 +142,25 @@ public class QuestionController {
                     HttpStatus.NOT_FOUND, exc.getMessage(), exc
             );
         } catch (TagAlreadyAddedToQuestionException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, exc.getMessage(), exc
+            );
+        }
+    }
+
+    @DeleteMapping("/question/{question_id}/tag/{tag_id}")
+    public ResponseEntity<Question> removeTagFromQuestion(@PathVariable Long question_id,
+                                                          @PathVariable Long tag_id) {
+        try {
+            Question question = questionService.getQuestionById(question_id);
+            Tag tag = tagService.getTagById(tag_id);
+            tagService.removeTagFromQuestion(tag, question);
+            return ResponseEntity.status(HttpStatus.OK).body(questionService.getQuestionById(question_id));
+        } catch (QuestionNotFoundException | TagNotFoundException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
+            );
+        } catch (TagNotBeenAddedToQuestionException exc) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, exc.getMessage(), exc
             );

@@ -1,6 +1,8 @@
 package com.codecool.Forum.service;
 
 import com.codecool.Forum.exception.TagAlreadyAddedToQuestionException;
+import com.codecool.Forum.exception.TagNotBeenAddedToQuestionException;
+import com.codecool.Forum.exception.TagNotFoundException;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.model.Tag;
 import com.codecool.Forum.reporsitory.TagRepository;
@@ -24,6 +26,14 @@ public class TagService {
         return tagRepository.findByName(tagName);
     }
 
+    public Tag getTagById(Long id) {
+        Optional<Tag> tag = tagRepository.findById(id);
+        if (tag.isPresent()) {
+            return tag.get();
+        }
+        throw new TagNotFoundException("Tag not found");
+    }
+
     public void add(String tagName, Question question) {
         Optional<Tag> tag = getTagByName(tagName.toLowerCase());
         if (!tag.isPresent()) {
@@ -36,5 +46,15 @@ public class TagService {
         questions.add(question);
         tag.get().setQuestions(questions);
         tagRepository.save(tag.get());
+    }
+
+    public void removeTagFromQuestion(Tag tag, Question question) {
+        List<Question> questions = tag.getQuestions();
+        boolean removed = questions.remove(question);
+        if (!removed) {
+            throw new TagNotBeenAddedToQuestionException("Tag not been added to this question");
+        }
+        tag.setQuestions(questions);
+        tagRepository.save(tag);
     }
 }
