@@ -1,5 +1,6 @@
 package com.codecool.Forum.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -21,13 +22,11 @@ public class Tag {
 
     private String name;
 
-    @ManyToMany
-    private List<Question> questions;
-
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "tag_question",
-            joinColumns = @JoinColumn(name = "tag_id",
-                    referencedColumnName = "question_id"))
-    private List<Question> question = new ArrayList<>();
+            joinColumns = @JoinColumn(name = "tag_id"),
+            inverseJoinColumns = @JoinColumn(name = "question_id"))
+    @Builder.Default private List<Question> questions = new ArrayList<>();
 
 }
