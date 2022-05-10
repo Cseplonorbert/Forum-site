@@ -25,9 +25,9 @@ public class TagService {
     }
 
     public void add(String tagName, Question question) {
-        Optional<Tag> tag = getTagByName(tagName);
+        Optional<Tag> tag = getTagByName(tagName.toLowerCase());
         if (!tag.isPresent()) {
-            tag = Optional.of(Tag.builder().name(tagName).build());
+            tag = Optional.of(Tag.builder().name(tagName.toLowerCase()).build());
         }
         List<Question> questions = tag.get().getQuestions();
         if (question.getTags().contains(tag.get())) {
