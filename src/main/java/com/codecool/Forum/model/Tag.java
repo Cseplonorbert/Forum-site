@@ -29,4 +29,22 @@ public class Tag {
             inverseJoinColumns = @JoinColumn(name = "question_id"))
     @Builder.Default private List<Question> questions = new ArrayList<>();
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof Tag))
+            return false;
+
+        Tag other = (Tag) o;
+
+        return id != null &&
+                id.equals(other.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
 }
