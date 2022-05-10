@@ -1,6 +1,7 @@
 package com.codecool.Forum.controller;
 
 import com.codecool.Forum.exception.QuestionNotFoundException;
+import com.codecool.Forum.exception.TagAlreadyAddedToQuestionException;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.service.AnswerService;
 import com.codecool.Forum.service.CommentService;
@@ -136,6 +137,10 @@ public class QuestionController {
         } catch (QuestionNotFoundException exc) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, exc.getMessage(), exc
+            );
+        } catch (TagAlreadyAddedToQuestionException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, exc.getMessage(), exc
             );
         }
     }
