@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -31,6 +32,9 @@ public class Question {
 
     @OneToMany(mappedBy = "question", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     List<Comment> comments;
+
+    @ManyToMany(mappedBy = "questions")
+    List<Tag> tags = new ArrayList<>();
 
     @Builder.Default private int viewed = 0;
 

@@ -1,10 +1,12 @@
 package com.codecool.Forum.controller;
 
 import com.codecool.Forum.exception.QuestionNotFoundException;
+import com.codecool.Forum.exception.TagAlreadyAddedToQuestionException;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.service.AnswerService;
 import com.codecool.Forum.service.CommentService;
 import com.codecool.Forum.service.QuestionService;
+import com.codecool.Forum.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +22,17 @@ public class QuestionController {
     QuestionService questionService;
     AnswerService answerService;
     CommentService commentService;
+    TagService tagService;
 
     @Autowired
-    public QuestionController(QuestionService questionService, AnswerService answerService,
-                              CommentService commentService) {
+    public QuestionController(QuestionService questionService,
+                              AnswerService answerService,
+                              CommentService commentService,
+                              TagService tagService) {
         this.questionService = questionService;
         this.answerService = answerService;
         this.commentService = commentService;
+        this.tagService = tagService;
     }
 
     @GetMapping("/list")
@@ -117,6 +123,24 @@ public class QuestionController {
         } catch (QuestionNotFoundException exc) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, exc.getMessage(), exc
+            );
+        }
+    }
+
+    @PostMapping("/question/{question_id}/new-tag")
+    public ResponseEntity<Question> addTag(@PathVariable Long question_id,
+                                           @RequestParam String tagName) {
+        try {
+            Question question = questionService.getQuestionById(question_id);
+            tagService.add(tagName, question);
+            return ResponseEntity.status(HttpStatus.CREATED).body(questionService.getQuestionById(question_id));
+        } catch (QuestionNotFoundException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
+            );
+        } catch (TagAlreadyAddedToQuestionException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, exc.getMessage(), exc
             );
         }
     }
