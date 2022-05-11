@@ -1,9 +1,6 @@
 package com.codecool.Forum.controller;
 
-import com.codecool.Forum.exception.QuestionNotFoundException;
-import com.codecool.Forum.exception.TagAlreadyAddedToQuestionException;
-import com.codecool.Forum.exception.TagNotBeenAddedToQuestionException;
-import com.codecool.Forum.exception.TagNotFoundException;
+import com.codecool.Forum.exception.*;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.model.Tag;
 import com.codecool.Forum.service.AnswerService;
@@ -11,12 +8,11 @@ import com.codecool.Forum.service.CommentService;
 import com.codecool.Forum.service.QuestionService;
 import com.codecool.Forum.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/")
@@ -38,14 +34,16 @@ public class QuestionController {
         this.tagService = tagService;
     }
 
-    @GetMapping("/list")
-    public List<Question> getAllQuestions(@RequestParam(required = false, name = "order_by") String orderBy,
-                                          @RequestParam(required = false, name = "order_direction") String orderDirection) {
+    @GetMapping("/questions")
+    public Page<Question> getAllQuestions(@RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
+                                          @RequestParam(defaultValue = "DESC") String order,
+                                          @RequestParam(defaultValue = "0") Integer page,
+                                          @RequestParam(defaultValue = "15") Integer pageSize) {
         try {
-            return questionService.getAllQuestions(orderBy, orderDirection);
-        } catch (IllegalArgumentException exc) {
+            return questionService.findAll(order, sort, page, pageSize);
+        } catch (IllegalArgumentException | IllegalPageSizeException exc) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Invalid Sorting Query", exc);
+                    HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
         }
     }
 
