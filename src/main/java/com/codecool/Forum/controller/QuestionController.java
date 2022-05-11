@@ -47,6 +47,20 @@ public class QuestionController {
         }
     }
 
+    @GetMapping("/search")
+    public Page<Question> search(@RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
+                                 @RequestParam(defaultValue = "DESC") String order,
+                                 @RequestParam(defaultValue = "0") Integer page,
+                                 @RequestParam(defaultValue = "15") Integer pageSize,
+                                 @RequestParam String phrase) {
+        try {
+            return questionService.search(phrase, order, sort, page, pageSize);
+        } catch (IllegalArgumentException | IllegalPageSizeException exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
+        }
+    }
+
     @GetMapping("/question/{question_id}")
     public Question getQuestionById(@PathVariable Long question_id) {
         try {
