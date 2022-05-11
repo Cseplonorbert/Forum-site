@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,17 +25,26 @@ public class QuestionService {
         this.questionRepository = questionRepository;
     }
 
-    public Page<Question> findAll(String orderBy, String order, Integer page, Integer pageSize) {
-        Sort sort = Sort.by(Sort.Direction.valueOf(orderBy),
-                    OrderBy.valueOf(order).getFieldName());
+    public Page<Question> findAll(String order, String orderBy, Integer page, Integer pageSize) {
+        Pageable pageable = getPageable(order, orderBy, page, pageSize);
+        return questionRepository.findAll(pageable);
+    }
+
+    public Page<Question> search(String phrase, String order, String orderBy, Integer page, Integer pageSize) {
+        Pageable pageable = getPageable(order, orderBy, page, pageSize);
+        return questionRepository.
+                findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(pageable, phrase, phrase);
+    }
+
+    private Pageable getPageable(String order, String orderBy, Integer page, Integer pageSize) {
+        Sort sort = Sort.by(Sort.Direction.valueOf(order),
+                OrderBy.valueOf(orderBy).getFieldName());
 
         if (pageSize > 50 || pageSize < 1) {
             throw new IllegalPageSizeException("Invalid pageSize, it must be between 1 and 50");
         }
 
-        Pageable pageable = PageRequest.of(page, pageSize, sort);
-
-        return questionRepository.findAll(pageable);
+        return PageRequest.of(page, pageSize, sort);
     }
 
     public Question getQuestionById(Long id) {
