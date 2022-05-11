@@ -1,11 +1,15 @@
 package com.codecool.Forum.service;
 
+import com.codecool.Forum.exception.IllegalPageSizeException;
 import com.codecool.Forum.exception.QuestionNotFoundException;
 import com.codecool.Forum.model.OrderBy;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.model.Vote;
 import com.codecool.Forum.reporsitory.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -22,15 +26,17 @@ public class QuestionService {
         this.questionRepository = questionRepository;
     }
 
-    public List<Question> getAllQuestions(String orderBy, String orderDirection) {
-        Sort sort;
-        if (orderBy == null || orderDirection == null) {
-            sort = Sort.by(Sort.Direction.DESC, "createdOn");
-        } else {
-            sort = Sort.by(Sort.Direction.valueOf(orderDirection),
-                    OrderBy.valueOf(orderBy).getFieldName());
+    public Page<Question> findAll(String orderBy, String order, Integer page, Integer pageSize) {
+        Sort sort = Sort.by(Sort.Direction.valueOf(orderBy),
+                    OrderBy.valueOf(order).getFieldName());
+
+        if (pageSize > 50 || pageSize < 1) {
+            throw new IllegalPageSizeException("Invalid pageSize, it must be between 1 and 50");
         }
-        return questionRepository.findAll(sort);
+
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+
+        return questionRepository.findAll(pageable);
     }
 
     public Question getQuestionById(Long id) {
