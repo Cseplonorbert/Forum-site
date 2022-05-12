@@ -1,7 +1,9 @@
 package com.codecool.Forum.controller;
 
+import com.codecool.Forum.assembler.QuestionPreviewAssembler;
 import com.codecool.Forum.exception.*;
 import com.codecool.Forum.model.Question;
+import com.codecool.Forum.model.QuestionPreview;
 import com.codecool.Forum.model.Tag;
 import com.codecool.Forum.service.AnswerService;
 import com.codecool.Forum.service.CommentService;
@@ -9,10 +11,14 @@ import com.codecool.Forum.service.QuestionService;
 import com.codecool.Forum.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/")
@@ -22,25 +28,30 @@ public class QuestionController {
     AnswerService answerService;
     CommentService commentService;
     TagService tagService;
+    QuestionPreviewAssembler questionPreviewAssembler;
 
     @Autowired
     public QuestionController(QuestionService questionService,
                               AnswerService answerService,
                               CommentService commentService,
-                              TagService tagService) {
+                              TagService tagService,
+                              QuestionPreviewAssembler questionPreviewAssembler) {
         this.questionService = questionService;
         this.answerService = answerService;
         this.commentService = commentService;
         this.tagService = tagService;
+        this.questionPreviewAssembler = questionPreviewAssembler;
     }
 
     @GetMapping("/questions")
-    public Page<Question> getAllQuestions(@RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
-                                          @RequestParam(defaultValue = "DESC") String order,
-                                          @RequestParam(defaultValue = "0") Integer page,
-                                          @RequestParam(defaultValue = "15") Integer pageSize) {
+    public CollectionModel<EntityModel<QuestionPreview>> all(@RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
+                                                  @RequestParam(defaultValue = "DESC") String order,
+                                                  @RequestParam(defaultValue = "0") Integer page,
+                                                  @RequestParam(defaultValue = "15") Integer pageSize) {
         try {
-            return questionService.findAll(order, sort, page, pageSize);
+            Page<Question> questions = questionService.findAll(order, sort, page, pageSize);
+            return CollectionModel.of(questions.map(question -> questionPreviewAssembler.toModel(question)),
+                    linkTo(methodOn(QuestionController.class).all(sort, order, page, pageSize)).withSelfRel());
         } catch (IllegalArgumentException | IllegalPageSizeException exc) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
