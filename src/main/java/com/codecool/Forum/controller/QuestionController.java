@@ -44,10 +44,11 @@ public class QuestionController {
     }
 
     @GetMapping("/questions")
-    public CollectionModel<EntityModel<QuestionPreview>> all(@RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
-                                                  @RequestParam(defaultValue = "DESC") String order,
-                                                  @RequestParam(defaultValue = "0") Integer page,
-                                                  @RequestParam(defaultValue = "15") Integer pageSize) {
+    public CollectionModel<EntityModel<QuestionPreview>> all(
+                                                        @RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
+                                                        @RequestParam(defaultValue = "DESC") String order,
+                                                        @RequestParam(defaultValue = "0") Integer page,
+                                                        @RequestParam(defaultValue = "15") Integer pageSize) {
         try {
             Page<Question> questions = questionService.findAll(order, sort, page, pageSize);
             return CollectionModel.of(questions.map(question -> questionPreviewAssembler.toModel(question)),
@@ -59,13 +60,17 @@ public class QuestionController {
     }
 
     @GetMapping("/search")
-    public Page<Question> search(@RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
-                                 @RequestParam(defaultValue = "DESC") String order,
-                                 @RequestParam(defaultValue = "0") Integer page,
-                                 @RequestParam(defaultValue = "15") Integer pageSize,
-                                 @RequestParam String phrase) {
+    public  CollectionModel<EntityModel<QuestionPreview>> search(
+                                                        @RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
+                                                        @RequestParam(defaultValue = "DESC") String order,
+                                                        @RequestParam(defaultValue = "0") Integer page,
+                                                        @RequestParam(defaultValue = "15") Integer pageSize,
+                                                        @RequestParam String phrase) {
         try {
-            return questionService.search(phrase, order, sort, page, pageSize);
+            Page<Question> questions = questionService.search(phrase, order, sort, page, pageSize);
+            return CollectionModel.of(questions.map(question -> questionPreviewAssembler.toModel(question)),
+                    linkTo(methodOn(QuestionController.class).search(sort, order, page, pageSize, phrase))
+                            .withSelfRel());
         } catch (IllegalArgumentException | IllegalPageSizeException exc) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
