@@ -2,11 +2,9 @@ package com.codecool.Forum.model;
 
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,21 +26,19 @@ public class Question {
     private String description;
 
     @OneToMany(mappedBy = "question", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    List<Answer> answers;
+    @Builder.Default List<Answer> answers = new ArrayList<>();
 
     @OneToMany(mappedBy = "question", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    List<Comment> comments;
+    @Builder.Default List<Comment> comments = new ArrayList<>();
 
     @ManyToMany(mappedBy = "questions")
-    List<Tag> tags = new ArrayList<>();
+    @Builder.Default List<Tag> tags = new ArrayList<>();
 
     @Builder.Default private int viewed = 0;
 
     @Builder.Default private int numberOfVotes = 0;
 
-    @JsonIgnore
     @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
-    @Builder.Default private String formattedDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
     @Override
     public boolean equals(Object o) {
