@@ -55,9 +55,11 @@ public class QuestionService {
         throw new QuestionNotFoundException("Question not found");
     }
 
-    public Question addQuestion(String title, String description) {
-        Question question = Question.builder().title(title).description(description).build();
-        return questionRepository.save(question);
+    public Question add(Question question) {
+        return questionRepository.save(Question.builder()
+                .title(question.getTitle())
+                .description(question.getDescription())
+                .build());
     }
 
     public void deleteQuestionById(Long id) {
