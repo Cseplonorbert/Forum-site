@@ -67,10 +67,10 @@ public class QuestionService {
         questionRepository.delete(question);
     }
 
-    public Question updateQuestion(Long id, String title, String description) {
+    public Question update(Long id, Question editedQuestion) {
         Question question = getQuestionById(id);
-        question.setTitle(title);
-        question.setDescription(description);
+        question.setTitle(editedQuestion.getTitle());
+        question.setDescription(editedQuestion.getDescription());
         return questionRepository.save(question);
     }
 
