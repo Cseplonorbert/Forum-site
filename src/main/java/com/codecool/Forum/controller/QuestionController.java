@@ -109,8 +109,13 @@ public class QuestionController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        try {
+            questionService.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (QuestionNotFoundException exc) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exc.getMessage(), exc);
+        }
     }
 
     @PostMapping("/{id}/down_vote")
