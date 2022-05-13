@@ -77,7 +77,7 @@ public class QuestionController {
     }
 
     @GetMapping("/{id}")
-    public EntityModel<QuestionView> getQuestionById(@PathVariable Long id) {
+    public EntityModel<QuestionView> get(@PathVariable Long id) {
         try {
             Question question = questionService.getQuestionById(id);
             return questionViewAssembler.toModel(question);

@@ -27,6 +27,6 @@ public class QuestionPreviewAssembler implements RepresentationModelAssembler<Qu
         QuestionPreview questionPreview = questionQuestionPreviewMapper.questionToQuestionPreview(question);
 
         return EntityModel.of(questionPreview,
-                linkTo(methodOn(QuestionController.class).getQuestionById(questionPreview.getId())).withSelfRel());
+                linkTo(methodOn(QuestionController.class).get(questionPreview.getId())).withSelfRel());
     }
 }

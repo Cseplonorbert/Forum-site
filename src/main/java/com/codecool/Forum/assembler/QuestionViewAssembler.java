@@ -27,7 +27,7 @@ public class QuestionViewAssembler implements RepresentationModelAssembler<Quest
         QuestionView questionView = questionQuestionViewMapper.questionQuestionView(question);
 
         return EntityModel.of(questionView,
-                linkTo(methodOn(QuestionController.class).getQuestionById(questionView.getId())).withSelfRel(),
+                linkTo(methodOn(QuestionController.class).get(questionView.getId())).withSelfRel(),
                 linkTo(methodOn(QuestionController.class).getAnswers(questionView.getId())).withRel("answers"),
                 linkTo(methodOn(QuestionController.class).getComments(questionView.getId())).withRel("comments"),
                 linkTo(methodOn(QuestionController.class).getTags(questionView.getId())).withRel("tags"));
