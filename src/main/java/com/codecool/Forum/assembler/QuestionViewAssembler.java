@@ -30,6 +30,7 @@ public class QuestionViewAssembler implements RepresentationModelAssembler<Quest
                 linkTo(methodOn(QuestionController.class).get(questionView.getId())).withSelfRel(),
                 linkTo(methodOn(QuestionController.class).getAnswers(questionView.getId())).withRel("answers"),
                 linkTo(methodOn(QuestionController.class).getComments(questionView.getId())).withRel("comments"),
-                linkTo(methodOn(QuestionController.class).getTags(questionView.getId())).withRel("tags"));
+                linkTo(methodOn(QuestionController.class).getTags(questionView.getId())).withRel("tags"),
+                linkTo(methodOn(QuestionController.class).update(questionView.getId(), question)).withRel("edit"));
     }
 }
