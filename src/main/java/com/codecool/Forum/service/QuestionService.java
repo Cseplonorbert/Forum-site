@@ -62,7 +62,7 @@ public class QuestionService {
                 .build());
     }
 
-    public void deleteQuestionById(Long id) {
+    public void delete(Long id) {
         Question question = getQuestionById(id);
         questionRepository.delete(question);
     }
