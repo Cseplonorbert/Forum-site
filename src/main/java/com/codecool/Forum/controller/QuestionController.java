@@ -22,8 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
-
 @RestController
 @RequestMapping("/questions")
 public class QuestionController {
@@ -85,7 +83,7 @@ public class QuestionController {
             return questionViewAssembler.toModel(question);
         } catch (QuestionNotFoundException exc) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Question Not Found", exc
+                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
             );
         }
     }
@@ -99,8 +97,15 @@ public class QuestionController {
     }
 
     @PutMapping("/{id}/edit")
-    public void edit(@PathVariable Long id,@RequestParam String title, @RequestParam String description) {
-
+    public ResponseEntity<EntityModel<QuestionView>> update(@PathVariable Long id, Question question) {
+        try {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(questionViewAssembler
+                            .toModel(questionService.update(id, question)));
+        } catch (QuestionNotFoundException exc) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exc.getMessage(), exc);
+        }
     }
 
     @DeleteMapping("/{id}")
