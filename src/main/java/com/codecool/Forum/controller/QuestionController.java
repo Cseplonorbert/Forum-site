@@ -3,7 +3,6 @@ package com.codecool.Forum.controller;
 import com.codecool.Forum.assembler.QuestionPreviewAssembler;
 import com.codecool.Forum.assembler.QuestionViewAssembler;
 import com.codecool.Forum.exception.*;
-import com.codecool.Forum.model.Answer;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.model.QuestionPreview;
 import com.codecool.Forum.model.view.AnswerView;
@@ -14,9 +13,12 @@ import com.codecool.Forum.service.QuestionService;
 import com.codecool.Forum.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,32 +28,34 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 @RequestMapping("/questions")
 public class QuestionController {
 
-    QuestionService questionService;
-    TagService tagService;
-    QuestionPreviewAssembler questionPreviewAssembler;
-    QuestionViewAssembler questionViewAssembler;
+    private final QuestionService questionService;
+    private final TagService tagService;
+    private final QuestionPreviewAssembler questionPreviewAssembler;
+    private final QuestionViewAssembler questionViewAssembler;
+    private final PagedResourcesAssembler<Question> pagedResourcesAssembler;
 
     @Autowired
     public QuestionController(QuestionService questionService,
                               TagService tagService,
                               QuestionPreviewAssembler questionPreviewAssembler,
-                              QuestionViewAssembler questionViewAssembler) {
+                              QuestionViewAssembler questionViewAssembler,
+                              PagedResourcesAssembler<Question> pagedResourcesAssembler) {
         this.questionService = questionService;
         this.tagService = tagService;
         this.questionPreviewAssembler = questionPreviewAssembler;
         this.questionViewAssembler = questionViewAssembler;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @GetMapping
-    public CollectionModel<EntityModel<QuestionPreview>> all(
+    public PagedModel<EntityModel<QuestionPreview>> all(
                                                         @RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
                                                         @RequestParam(defaultValue = "DESC") String order,
                                                         @RequestParam(defaultValue = "0") Integer page,
                                                         @RequestParam(defaultValue = "15") Integer pageSize) {
         try {
             Page<Question> questions = questionService.findAll(order, sort, page, pageSize);
-            return CollectionModel.of(questions.map(question -> questionPreviewAssembler.toModel(question)),
-                    linkTo(methodOn(QuestionController.class).all(sort, order, page, pageSize)).withSelfRel());
+            return pagedResourcesAssembler.toModel(questions, questionPreviewAssembler);
         } catch (IllegalArgumentException | IllegalPageSizeException exc) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
@@ -89,8 +93,11 @@ public class QuestionController {
     }
 
     @PostMapping("/add")
-    public void add(@RequestParam String title, @RequestParam String description) {
-
+    public ResponseEntity<EntityModel<QuestionView>> add(@RequestBody Question question) {
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(questionViewAssembler
+                            .toModel(questionService.add(question)));
     }
 
     @PutMapping("/{id}/edit")
