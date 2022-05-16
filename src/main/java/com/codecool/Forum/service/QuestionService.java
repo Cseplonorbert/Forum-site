@@ -75,8 +75,17 @@ public class QuestionService {
     }
 
     public Question downVote(Long id) {
-        Question question = getQuestionById(id);
         Vote vote = Vote.DOWN;
+        return vote(vote, id);
+    }
+
+    public Question upVote(Long id) {
+        Vote vote = Vote.UP;
+        return vote(vote, id);
+    }
+
+    private Question vote(Vote vote, Long id) {
+        Question question = getQuestionById(id);
         question.setNumberOfVotes(question.getNumberOfVotes() + vote.getValue());
         return questionRepository.save(question);
     }
