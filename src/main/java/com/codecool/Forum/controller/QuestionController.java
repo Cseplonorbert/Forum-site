@@ -119,8 +119,12 @@ public class QuestionController {
     }
 
     @PostMapping("/{id}/down_vote")
-    public void downVote(@PathVariable Long id) {
-
+    public EntityModel<QuestionView> downVote(@PathVariable Long id) {
+        try {
+            return questionViewAssembler.toModel(questionService.downVote(id));
+        } catch (QuestionNotFoundException exc) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exc.getMessage(), exc);
+        }
     }
 
     @PostMapping("/{id}/up_vote")
