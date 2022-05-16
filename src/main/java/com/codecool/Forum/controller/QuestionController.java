@@ -1,14 +1,17 @@
 package com.codecool.Forum.controller;
 
+import com.codecool.Forum.assembler.AnswerViewAssembler;
 import com.codecool.Forum.assembler.QuestionPreviewAssembler;
 import com.codecool.Forum.assembler.QuestionViewAssembler;
 import com.codecool.Forum.exception.*;
+import com.codecool.Forum.model.Answer;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.model.QuestionPreview;
 import com.codecool.Forum.model.view.AnswerView;
 import com.codecool.Forum.model.view.CommentView;
 import com.codecool.Forum.model.view.QuestionView;
 import com.codecool.Forum.model.view.TagView;
+import com.codecool.Forum.service.AnswerService;
 import com.codecool.Forum.service.QuestionService;
 import com.codecool.Forum.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,18 +34,24 @@ public class QuestionController {
     private final QuestionPreviewAssembler questionPreviewAssembler;
     private final QuestionViewAssembler questionViewAssembler;
     private final PagedResourcesAssembler<Question> pagedResourcesAssembler;
+    private final AnswerViewAssembler answerViewAssembler;
+    private final AnswerService answerService;
 
     @Autowired
     public QuestionController(QuestionService questionService,
                               TagService tagService,
                               QuestionPreviewAssembler questionPreviewAssembler,
                               QuestionViewAssembler questionViewAssembler,
-                              PagedResourcesAssembler<Question> pagedResourcesAssembler) {
+                              PagedResourcesAssembler<Question> pagedResourcesAssembler,
+                              AnswerViewAssembler answerViewAssembler,
+                              AnswerService answerService) {
         this.questionService = questionService;
         this.tagService = tagService;
         this.questionPreviewAssembler = questionPreviewAssembler;
         this.questionViewAssembler = questionViewAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.answerViewAssembler = answerViewAssembler;
+        this.answerService = answerService;
     }
 
     @GetMapping
@@ -138,12 +147,20 @@ public class QuestionController {
 
     @GetMapping("/{id}/answers")
     public CollectionModel<EntityModel<AnswerView>> getAnswers(@PathVariable Long id) {
-        return CollectionModel.empty();
+        return answerViewAssembler.toCollectionModel(answerService.getAnswersByQuestionId(id));
     }
 
     @PostMapping("/{id}/answers/add")
-    public void addAnswer(@PathVariable Long id, @RequestParam String message) {
-
+    public ResponseEntity<EntityModel<AnswerView>> addAnswer(@PathVariable Long id, @RequestBody Answer answer) {
+        try {
+            Question question = questionService.getQuestionById(id);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(answerViewAssembler
+                            .toModel(answerService.add(question, answer)));
+        } catch (QuestionNotFoundException exc) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exc.getMessage(), exc);
+        }
     }
 
     @GetMapping("/{id}/comments")
