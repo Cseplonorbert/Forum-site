@@ -74,10 +74,10 @@ public class QuestionService {
         return questionRepository.save(question);
     }
 
-    public Question voteOnQuestion(Long id, String vote) {
+    public Question downVote(Long id) {
         Question question = getQuestionById(id);
-        Vote voteDir = Vote.valueOf(vote);
-        question.setNumberOfVotes(question.getNumberOfVotes() + voteDir.getValue());
+        Vote vote = Vote.DOWN;
+        question.setNumberOfVotes(question.getNumberOfVotes() + vote.getValue());
         return questionRepository.save(question);
     }
 }
