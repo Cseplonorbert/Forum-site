@@ -26,6 +26,10 @@ public class TagService {
         return tagRepository.findByName(tagName);
     }
 
+    public List<Tag> getTagsByQuestion(Question question) {
+        return tagRepository.getTagsByQuestionsContaining(question);
+    }
+
     public Tag getTagById(Long id) {
         Optional<Tag> tag = tagRepository.findById(id);
         if (tag.isPresent()) {
@@ -34,7 +38,7 @@ public class TagService {
         throw new TagNotFoundException("Tag not found");
     }
 
-    public void add(String tagName, Question question) {
+    public Tag add(String tagName, Question question) {
         Optional<Tag> tag = getTagByName(tagName.toLowerCase());
         if (!tag.isPresent()) {
             tag = Optional.of(Tag.builder().name(tagName.toLowerCase()).build());
@@ -45,7 +49,7 @@ public class TagService {
         }
         questions.add(question);
         tag.get().setQuestions(questions);
-        tagRepository.save(tag.get());
+        return tagRepository.save(tag.get());
     }
 
     public void removeTagFromQuestion(Tag tag, Question question) {

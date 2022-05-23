@@ -1,14 +1,8 @@
 package com.codecool.Forum.controller;
 
-import com.codecool.Forum.assembler.AnswerViewAssembler;
-import com.codecool.Forum.assembler.CommentViewAssembler;
-import com.codecool.Forum.assembler.QuestionPreviewAssembler;
-import com.codecool.Forum.assembler.QuestionViewAssembler;
+import com.codecool.Forum.assembler.*;
 import com.codecool.Forum.exception.*;
-import com.codecool.Forum.model.Answer;
-import com.codecool.Forum.model.Comment;
-import com.codecool.Forum.model.Question;
-import com.codecool.Forum.model.QuestionPreview;
+import com.codecool.Forum.model.*;
 import com.codecool.Forum.model.view.AnswerView;
 import com.codecool.Forum.model.view.CommentView;
 import com.codecool.Forum.model.view.QuestionView;
@@ -41,6 +35,7 @@ public class QuestionController {
     private final AnswerService answerService;
     private final CommentService commentService;
     private final CommentViewAssembler commentViewAssembler;
+    private final TagViewAssembler tagViewAssembler;
 
     @Autowired
     public QuestionController(QuestionService questionService,
@@ -51,7 +46,8 @@ public class QuestionController {
                               AnswerViewAssembler answerViewAssembler,
                               AnswerService answerService,
                               CommentService commentService,
-                              CommentViewAssembler commentViewAssembler) {
+                              CommentViewAssembler commentViewAssembler,
+                              TagViewAssembler tagViewAssembler) {
         this.questionService = questionService;
         this.tagService = tagService;
         this.questionPreviewAssembler = questionPreviewAssembler;
@@ -61,6 +57,7 @@ public class QuestionController {
         this.answerService = answerService;
         this.commentService = commentService;
         this.commentViewAssembler = commentViewAssembler;
+        this.tagViewAssembler = tagViewAssembler;
     }
 
     @GetMapping
@@ -191,16 +188,37 @@ public class QuestionController {
 
     @GetMapping("/{id}tags")
     public CollectionModel<EntityModel<TagView>> getTags(@PathVariable Long id) {
-        return CollectionModel.empty();
+        try {
+            Question question = questionService.getQuestionById(id);
+            return tagViewAssembler.toCollectionModel(tagService.getTagsByQuestion(question));
+        } catch (QuestionNotFoundException exc) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exc.getMessage(), exc);
+        }
     }
 
     @PostMapping("/{id}/tags/add")
-    public void addTag(@PathVariable Long id, @RequestParam String tagName) {
-
+    public EntityModel<TagView> addTag(@PathVariable Long id, @RequestParam String tagName) {
+        try {
+            Question question = questionService.getQuestionById(id);
+            return tagViewAssembler.toModel(tagService.add(tagName, question));
+        } catch (QuestionNotFoundException exc) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exc.getMessage(), exc);
+        } catch (TagAlreadyAddedToQuestionException exc) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
+        }
     }
 
     @DeleteMapping("/{id}/tags/delete/{tag_id}")
-    public void deleteTag(@PathVariable Long id, @PathVariable Long tag_id) {
-
+    public ResponseEntity<Void> deleteTag(@PathVariable Long id, @PathVariable Long tag_id) {
+        try {
+            Question question = questionService.getQuestionById(id);
+            Tag tag = tagService.getTagById(tag_id);
+            tagService.removeTagFromQuestion(tag, question);
+            return ResponseEntity.noContent().build();
+        } catch (QuestionNotFoundException | TagNotFoundException exc) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exc.getMessage(), exc);
+        } catch (TagNotBeenAddedToQuestionException exc) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
+        }
     }
 }
