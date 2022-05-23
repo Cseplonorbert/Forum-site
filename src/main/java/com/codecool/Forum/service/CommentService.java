@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,12 +30,16 @@ public class CommentService {
         throw new CommentNotFoundException("Comment not found");
     }
 
-    public void addNewComment(Question question, String message) {
-        Comment comment = Comment.builder()
-                .message(message)
-                .question(question)
-                .build();
-        commentRepository.save(comment);
+    public List<Comment> getCommentsByQuestionId(Long id) {
+        return commentRepository.findCommentsByQuestionId(id);
+    }
+
+    public Comment add(Question question, Comment comment) {
+        return commentRepository.save(
+                Comment.builder()
+                        .message(comment.getMessage())
+                        .question(question)
+                        .build());
     }
 
     public void addNewComment(Answer answer, String message) {
