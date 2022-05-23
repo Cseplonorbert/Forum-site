@@ -2,10 +2,10 @@ package com.codecool.Forum.model;
 
 public enum OrderBy {
     TITLE("title"),
-    SUBMISSION_TIME("createdOn"),
-    DESCRIPTION("description"),
-    NUMBER_OF_VIEWS("viewed"),
-    NUMBER_OF_VOTES("votes");
+    SUBMISSION_TIME("submissionTime"),
+    DESCRIPTION("message"),
+    NUMBER_OF_VIEWS("viewNumber"),
+    NUMBER_OF_VOTES("voteNumber");
 
     private final String fieldName;
 

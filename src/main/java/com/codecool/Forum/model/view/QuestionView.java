@@ -5,15 +5,19 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Setter
 @Getter
 @Builder
 public class QuestionView {
+
     @JsonIgnore
     private Long id;
+
     private String title;
-    private String description;
-    private Integer view_count;
-    private Integer score;
-    private String creation_date;
+    private String message;
+    private Integer viewNumber;
+    private Integer voteNumber;
+    private LocalDateTime submissionTime;
 }

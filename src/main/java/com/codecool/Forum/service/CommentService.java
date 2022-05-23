@@ -52,9 +52,8 @@ public class CommentService {
     public Question update(Long id, String message) {
         Comment comment = findCommentById(id);
         comment.setMessage(message);
-        comment.setEditedNumberOfTimes(comment.getEditedNumberOfTimes() + 1);
-        comment.setEdited(true);
-        comment.setCreatedOn(LocalDateTime.now());
+        comment.setEditedCount(comment.getEditedCount() + 1);
+        comment.setSubmissionTime(LocalDateTime.now());
         commentRepository.save(comment);
         return getQuestion(comment);
     }

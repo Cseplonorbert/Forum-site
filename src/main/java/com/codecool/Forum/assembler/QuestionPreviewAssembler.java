@@ -5,7 +5,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import com.codecool.Forum.controller.QuestionController;
 import com.codecool.Forum.mapper.QuestionQuestionPreviewMapper;
 import com.codecool.Forum.model.Question;
-import com.codecool.Forum.model.QuestionPreview;
+import com.codecool.Forum.model.view.QuestionPreview;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;

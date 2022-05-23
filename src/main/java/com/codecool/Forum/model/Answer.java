@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ANSWERS")
+@Table(name = "answer")
 public class Answer {
 
     @Id
@@ -29,7 +29,9 @@ public class Answer {
     @OneToMany(mappedBy = "answer", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Builder.Default private List<Comment> comments = new ArrayList<>();
 
-    @Builder.Default private int numberOfVotes = 0;
+    @Column(name = "vote_number")
+    @Builder.Default private int voteNumber = 0;
 
-    @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
+    @Column(name = "submission_time")
+    @Builder.Default private LocalDateTime submissionTime = LocalDateTime.now();
 }

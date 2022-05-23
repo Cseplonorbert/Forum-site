@@ -33,7 +33,7 @@ public class QuestionService {
     public Page<Question> search(String phrase, String order, String orderBy, Integer page, Integer pageSize) {
         Pageable pageable = getPageable(order, orderBy, page, pageSize);
         return questionRepository.
-                findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(pageable, phrase, phrase);
+                findByTitleContainingIgnoreCaseOrMessageContainingIgnoreCase(pageable, phrase, phrase);
     }
 
     private Pageable getPageable(String order, String orderBy, Integer page, Integer pageSize) {
@@ -58,7 +58,7 @@ public class QuestionService {
     public Question add(Question question) {
         return questionRepository.save(Question.builder()
                 .title(question.getTitle())
-                .description(question.getDescription())
+                .message(question.getMessage())
                 .build());
     }
 
@@ -70,7 +70,7 @@ public class QuestionService {
     public Question update(Long id, Question editedQuestion) {
         Question question = getQuestionById(id);
         question.setTitle(editedQuestion.getTitle());
-        question.setDescription(editedQuestion.getDescription());
+        question.setMessage(editedQuestion.getMessage());
         return questionRepository.save(question);
     }
 
@@ -86,7 +86,7 @@ public class QuestionService {
 
     private Question vote(Vote vote, Long id) {
         Question question = getQuestionById(id);
-        question.setNumberOfVotes(question.getNumberOfVotes() + vote.getValue());
+        question.setVoteNumber(question.getVoteNumber() + vote.getValue());
         return questionRepository.save(question);
     }
 }

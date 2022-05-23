@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "QUESTION")
+@Table(name = "question")
 public class Question {
 
     @Id
@@ -23,7 +23,7 @@ public class Question {
 
     private String title;
 
-    private String description;
+    private String message;
 
     @OneToMany(mappedBy = "question", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Builder.Default List<Answer> answers = new ArrayList<>();
@@ -31,14 +31,21 @@ public class Question {
     @OneToMany(mappedBy = "question", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Builder.Default List<Comment> comments = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "questions")
+    @ManyToMany
+    @JoinTable(
+            name = "question_tag",
+            joinColumns = @JoinColumn(name = "question_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @Builder.Default List<Tag> tags = new ArrayList<>();
 
-    @Builder.Default private int viewed = 0;
+    @Column(name = "view_number")
+    @Builder.Default private int viewNumber = 0;
 
-    @Builder.Default private int numberOfVotes = 0;
+    @Column(name = "vote_number")
+    @Builder.Default private int voteNumber = 0;
 
-    @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
+    @Column(name = "submission_time")
+    @Builder.Default private LocalDateTime submissionTime = LocalDateTime.now();
 
     @Override
     public boolean equals(Object o) {

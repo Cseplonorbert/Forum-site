@@ -49,7 +49,7 @@ public class AnswerService {
     public Question voteOnAnswer(Long id, String vote) {
         Answer answer = getAnswerById(id);
         Vote voteDir = Vote.valueOf(vote);
-        answer.setNumberOfVotes(answer.getNumberOfVotes() + voteDir.getValue());
+        answer.setVoteNumber(answer.getVoteNumber() + voteDir.getValue());
         return answer.getQuestion();
     }
 

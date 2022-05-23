@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 public class TagTagViewMapperImpl implements TagTagViewMapper{
     @Override
     public TagView tagTagView(Tag tag) {
+        if (tag == null) {
+            return null;
+        }
         return TagView.builder()
                 .id(tag.getId())
                 .name(tag.getName())
