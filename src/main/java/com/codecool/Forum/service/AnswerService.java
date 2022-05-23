@@ -8,6 +8,7 @@ import com.codecool.Forum.reporsitory.AnswerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,12 +21,15 @@ public class AnswerService {
         this.answerRepository = answerRepository;
     }
 
-    public void addNewAnswer(Question question, String message) {
-        Answer answer = Answer.builder()
-                .message(message)
+    public Answer add(Question question, Answer answer) {
+        return answerRepository.save(Answer.builder()
+                .message(answer.getMessage())
                 .question(question)
-                .build();
-        answerRepository.save(answer);
+                .build());
+    }
+
+    public List<Answer> getAnswersByQuestionId(Long id) {
+        return answerRepository.findAnswersByQuestionId(id);
     }
 
     public Answer getAnswerById(Long id) {

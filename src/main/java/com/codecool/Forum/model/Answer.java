@@ -1,11 +1,10 @@
 package com.codecool.Forum.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,17 +22,14 @@ public class Answer {
 
     private String message;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
     @OneToMany(mappedBy = "answer", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private List<Comment> comments;
+    @Builder.Default private List<Comment> comments = new ArrayList<>();
 
     @Builder.Default private int numberOfVotes = 0;
 
-    @JsonIgnore
     @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
-    @Builder.Default private String formattedDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 }

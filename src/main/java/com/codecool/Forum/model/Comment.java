@@ -20,12 +20,10 @@ public class Comment {
 
     private String message;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "question_id")
     private Question question;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "answer_id")
     private Answer answer;

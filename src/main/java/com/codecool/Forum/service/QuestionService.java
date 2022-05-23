@@ -55,27 +55,38 @@ public class QuestionService {
         throw new QuestionNotFoundException("Question not found");
     }
 
-    public Question addQuestion(String title, String description) {
-        Question question = Question.builder().title(title).description(description).build();
-        return questionRepository.save(question);
+    public Question add(Question question) {
+        return questionRepository.save(Question.builder()
+                .title(question.getTitle())
+                .description(question.getDescription())
+                .build());
     }
 
-    public void deleteQuestionById(Long id) {
+    public void delete(Long id) {
         Question question = getQuestionById(id);
         questionRepository.delete(question);
     }
 
-    public Question updateQuestion(Long id, String title, String description) {
+    public Question update(Long id, Question editedQuestion) {
         Question question = getQuestionById(id);
-        question.setTitle(title);
-        question.setDescription(description);
+        question.setTitle(editedQuestion.getTitle());
+        question.setDescription(editedQuestion.getDescription());
         return questionRepository.save(question);
     }
 
-    public Question voteOnQuestion(Long id, String vote) {
+    public Question downVote(Long id) {
+        Vote vote = Vote.DOWN;
+        return vote(vote, id);
+    }
+
+    public Question upVote(Long id) {
+        Vote vote = Vote.UP;
+        return vote(vote, id);
+    }
+
+    private Question vote(Vote vote, Long id) {
         Question question = getQuestionById(id);
-        Vote voteDir = Vote.valueOf(vote);
-        question.setNumberOfVotes(question.getNumberOfVotes() + voteDir.getValue());
+        question.setNumberOfVotes(question.getNumberOfVotes() + vote.getValue());
         return questionRepository.save(question);
     }
 }
