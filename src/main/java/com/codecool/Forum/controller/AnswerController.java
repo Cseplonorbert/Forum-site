@@ -45,7 +45,7 @@ public class AnswerController {
         return getAllAnswersByQuestionId(questionId);
     }
 
-    @GetMapping("answers/{answerId}")
+    @GetMapping("/answers/{answerId}")
     public EntityModel<AnswerView> getAnswerById(@PathVariable Long answerId) {
         return answerViewAssembler.toModel(answerService.getAnswerById(answerId));
     }
@@ -58,8 +58,8 @@ public class AnswerController {
 
     @PutMapping("/answers/{answerId}")
     public CollectionModel<EntityModel<AnswerView>> update(@PathVariable Long answerId,
-                                                           @RequestParam String message) {
-        Question question = answerService.update(answerId, message);
+                                                           @RequestParam Answer answer) {
+        Question question = answerService.update(answerId, answer);
         return getAllAnswersByQuestionId(question.getId());
     }
 

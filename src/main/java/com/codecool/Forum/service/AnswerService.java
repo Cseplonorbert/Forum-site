@@ -53,9 +53,9 @@ public class AnswerService {
         return answer.getQuestion();
     }
 
-    public Question update(Long id, String message) {
+    public Question update(Long id, Answer updatedAnswer) {
         Answer answer = getAnswerById(id);
-        answer.setMessage(message);
+        answer.setMessage(updatedAnswer.getMessage());
         answerRepository.save(answer);
         return answer.getQuestion();
     }
