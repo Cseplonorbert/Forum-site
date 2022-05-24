@@ -31,4 +31,13 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public  ResponseEntity<Object> handleCommentNotFoundException(CommentNotFoundException exc, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamps", LocalDateTime.now());
+        body.put("message", exc.getMessage());
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
 }
