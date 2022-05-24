@@ -4,16 +4,17 @@ import com.codecool.Forum.model.Answer;
 import com.codecool.Forum.model.view.AnswerView;
 import org.springframework.stereotype.Component;
 
-import java.time.format.DateTimeFormatter;
-
 @Component
 public class AnswerAnswerViewImpl implements AnswerAnswerViewMapper{
     @Override
     public AnswerView answerAnswerView(Answer answer) {
+        if (answer == null) {
+            return null;
+        }
         return AnswerView.builder()
                 .message(answer.getMessage())
-                .score(answer.getNumberOfVotes())
-                .creation_date(answer.getCreatedOn().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .voteNumber(answer.getVoteNumber())
+                .submissionTime(answer.getSubmissionTime())
                 .build();
     }
 }

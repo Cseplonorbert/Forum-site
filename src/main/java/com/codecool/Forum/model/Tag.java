@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "TAG")
+@Table(name = "tag")
 public class Tag {
 
     @Id
@@ -22,11 +22,7 @@ public class Tag {
 
     private String name;
 
-    @JsonIgnore
-    @ManyToMany
-    @JoinTable(name = "tag_question",
-            joinColumns = @JoinColumn(name = "tag_id"),
-            inverseJoinColumns = @JoinColumn(name = "question_id"))
+    @ManyToMany(mappedBy = "tags")
     @Builder.Default private List<Question> questions = new ArrayList<>();
 
     @Override

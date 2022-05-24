@@ -1,6 +1,5 @@
 package com.codecool.Forum.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -12,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "comment")
 public class Comment {
 
     @Id
@@ -28,9 +28,10 @@ public class Comment {
     @JoinColumn(name = "answer_id")
     private Answer answer;
 
-    @Builder.Default private int editedNumberOfTimes = 0;
-    @Builder.Default private boolean edited = false;
+    @Column(name = "edited_count")
+    @Builder.Default private int editedCount = 0;
 
-    @Builder.Default private LocalDateTime createdOn = LocalDateTime.now();
+    @Column(name = "submission_time")
+    @Builder.Default private LocalDateTime submissionTime = LocalDateTime.now();
 
 }
