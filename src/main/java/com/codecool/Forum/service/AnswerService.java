@@ -14,11 +14,15 @@ import java.util.Optional;
 @Service
 public class AnswerService {
 
-    AnswerRepository answerRepository;
+    private final AnswerRepository answerRepository;
 
     @Autowired
     public AnswerService(AnswerRepository answerRepository) {
         this.answerRepository = answerRepository;
+    }
+
+    public boolean existsById(Long id) {
+        return answerRepository.existsById(id);
     }
 
     public Answer add(Question question, Answer answer) {
@@ -37,7 +41,7 @@ public class AnswerService {
         if (answer.isPresent()) {
             return answer.get();
         }
-        throw new AnswerNotFoundException("Answer Not Found");
+        throw new AnswerNotFoundException(id);
     }
 
     public Question deleteAnswer(Long id) {
@@ -53,10 +57,27 @@ public class AnswerService {
         return answer.getQuestion();
     }
 
-    public Question update(Long id, String message) {
+    public Question update(Long id, Answer updatedAnswer) {
         Answer answer = getAnswerById(id);
-        answer.setMessage(message);
+        answer.setMessage(updatedAnswer.getMessage());
         answerRepository.save(answer);
         return answer.getQuestion();
+    }
+
+    public Question upVote(Long id) {
+        Answer answer = getAnswerById(id);
+        Vote vote = Vote.UP;
+        return vote(answer, vote);
+    }
+
+    public Question downVote(Long id) {
+        Answer answer = getAnswerById(id);
+        Vote vote = Vote.DOWN;
+        return vote(answer, vote);
+    }
+
+    private Question vote(Answer answer, Vote vote) {
+        answer.setVoteNumber(answer.getVoteNumber() + vote.getValue());
+        return answerRepository.save(answer).getQuestion();
     }
 }

@@ -1,5 +1,8 @@
 package com.codecool.Forum.assembler;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import com.codecool.Forum.controller.AnswerController;
 import com.codecool.Forum.mapper.AnswerAnswerViewMapper;
 import com.codecool.Forum.model.Answer;
 import com.codecool.Forum.model.view.AnswerView;
@@ -23,7 +26,10 @@ public class AnswerViewAssembler implements RepresentationModelAssembler<Answer,
     @Override
     public EntityModel<AnswerView> toModel(Answer answer) {
         AnswerView answerView = answerAnswerViewMapper.answerAnswerView(answer);
-        return EntityModel.of(answerView);
+        return EntityModel.of(answerView,
+                linkTo(methodOn(AnswerController.class).getAnswerById(answer.getId())).withSelfRel(),
+                linkTo(methodOn(AnswerController.class).upVote(answer.getId())).withRel("upVote"),
+                linkTo(methodOn(AnswerController.class).downVote(answer.getId())).withRel("downVote"));
     }
 
     @Override

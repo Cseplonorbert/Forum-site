@@ -1,5 +1,8 @@
 package com.codecool.Forum.assembler;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import com.codecool.Forum.controller.CommentController;
 import com.codecool.Forum.mapper.CommentCommentViewMapper;
 import com.codecool.Forum.model.Comment;
 import com.codecool.Forum.model.view.CommentView;
@@ -22,7 +25,8 @@ public class CommentViewAssembler implements RepresentationModelAssembler<Commen
     @Override
     public EntityModel<CommentView> toModel(Comment comment) {
         CommentView commentView = commentCommentViewMapper.commentCommentView(comment);
-        return EntityModel.of(commentView);
+        return EntityModel.of(commentView,
+                linkTo(methodOn(CommentController.class).get(comment.getId())).withSelfRel());
     }
 
     @Override

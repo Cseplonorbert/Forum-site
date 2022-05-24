@@ -1,78 +1,77 @@
 package com.codecool.Forum.controller;
 
-import com.codecool.Forum.exception.AnswerNotFoundException;
+import com.codecool.Forum.assembler.AnswerViewAssembler;
+import com.codecool.Forum.exception.QuestionNotFoundException;
 import com.codecool.Forum.model.Answer;
 import com.codecool.Forum.model.Question;
+import com.codecool.Forum.model.view.AnswerView;
 import com.codecool.Forum.service.AnswerService;
-import com.codecool.Forum.service.CommentService;
+import com.codecool.Forum.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/answer")
+@RequestMapping("/api")
 public class AnswerController {
 
-    AnswerService answerService;
-    CommentService commentService;
+    private final AnswerService answerService;
+    private final QuestionService questionService;
+    private final AnswerViewAssembler answerViewAssembler;
 
     @Autowired
-    public AnswerController (AnswerService answerService, CommentService commentService) {
+    public AnswerController (AnswerService answerService,
+                             QuestionService questionService,
+                             AnswerViewAssembler answerViewAssembler) {
         this.answerService = answerService;
-        this.commentService = commentService;
+        this.questionService = questionService;
+        this.answerViewAssembler = answerViewAssembler;
     }
 
-    @DeleteMapping("/{answer_id}/delete")
-    public ResponseEntity<Question> deleteAnswer(@PathVariable Long answer_id) {
-        try {
-            Question question = answerService.deleteAnswer(answer_id);
-            return ResponseEntity.status(HttpStatus.OK).body(question);
-        } catch (AnswerNotFoundException exc) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
-            );
+    @GetMapping("/questions/{questionId}/answers")
+    public CollectionModel<EntityModel<AnswerView>> getAllAnswersByQuestionId(@PathVariable Long questionId) {
+        if (!questionService.existsById(questionId)) {
+            throw new QuestionNotFoundException(questionId);
         }
+        return answerViewAssembler.toCollectionModel(answerService.getAnswersByQuestionId(questionId));
     }
 
-    @PutMapping("/{answer_id}/vote")
-    public ResponseEntity<Question> voteOnAnswer(@PathVariable Long answer_id,
-                                               @RequestParam(name = "vote_method") String vote) {
-        try {
-            Question question = answerService.voteOnAnswer(answer_id, vote);
-            return ResponseEntity.status(HttpStatus.OK).body(question);
-        } catch (AnswerNotFoundException exc) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
-            );
-        }
+    @PostMapping("/questions/{questionId}/answers")
+    public CollectionModel<EntityModel<AnswerView>> createAnswer(@PathVariable Long questionId,
+                                                                 @RequestBody Answer answer ) {
+        Question question = questionService.getQuestionById(questionId);
+        answerService.add(question, answer);
+        return getAllAnswersByQuestionId(questionId);
     }
 
-    @PostMapping("/{answer_id}/new-comment")
-    public ResponseEntity<Question> addComment(@PathVariable Long answer_id,
-                                               @RequestParam String message) {
-        try {
-            Answer answer = answerService.getAnswerById(answer_id);
-            commentService.addNewComment(answer, message);
-            return ResponseEntity.status(HttpStatus.CREATED).body(answer.getQuestion());
-        } catch (AnswerNotFoundException exc) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
-            );
-        }
+    @GetMapping("/answers/{answerId}")
+    public EntityModel<AnswerView> getAnswerById(@PathVariable Long answerId) {
+        return answerViewAssembler.toModel(answerService.getAnswerById(answerId));
     }
 
-    @PutMapping("/{answer_id}/edit")
-    public ResponseEntity<Question> update(@PathVariable Long answer_id,
-                                           @RequestParam String message) {
-        try {
-            Question question = answerService.update(answer_id, message);
-            return ResponseEntity.status(HttpStatus.OK).body(question);
-        } catch (AnswerNotFoundException exc) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, exc.getMessage(), exc
-            );
-        }
+    @DeleteMapping("/answers/{answerId}")
+    public CollectionModel<EntityModel<AnswerView>> deleteAnswer(@PathVariable Long answerId) {
+        Question question = answerService.deleteAnswer(answerId);
+        return getAllAnswersByQuestionId(question.getId());
+    }
+
+    @PutMapping("/answers/{answerId}")
+    public CollectionModel<EntityModel<AnswerView>> update(@PathVariable Long answerId,
+                                                           @RequestParam Answer answer) {
+        Question question = answerService.update(answerId, answer);
+        return getAllAnswersByQuestionId(question.getId());
+    }
+
+    @PostMapping("/answers/{answerId}/up_vote")
+    public CollectionModel<EntityModel<AnswerView>> upVote(@PathVariable Long answerId) {
+        Question question = answerService.upVote(answerId);
+        return getAllAnswersByQuestionId(question.getId());
+    }
+
+    @PostMapping("/answers/{answerId}/down_vote")
+    public CollectionModel<EntityModel<AnswerView>> downVote(@PathVariable Long answerId) {
+        Question question = answerService.downVote(answerId);
+        return getAllAnswersByQuestionId(question.getId());
     }
 }

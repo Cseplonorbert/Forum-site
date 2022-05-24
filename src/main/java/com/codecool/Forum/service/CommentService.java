@@ -15,23 +15,27 @@ import java.util.Optional;
 @Service
 public class CommentService {
 
-    CommentRepository commentRepository;
+    private final CommentRepository commentRepository;
 
     @Autowired
     public CommentService(CommentRepository commentRepository) {
         this.commentRepository = commentRepository;
     }
 
-    public Comment findCommentById(Long id) {
+    public Comment getCommentById(Long id) {
         Optional<Comment> comment = commentRepository.findById(id);
         if (comment.isPresent()) {
             return comment.get();
         }
-        throw new CommentNotFoundException("Comment not found");
+        throw new CommentNotFoundException(id);
     }
 
     public List<Comment> getCommentsByQuestionId(Long id) {
         return commentRepository.findCommentsByQuestionId(id);
+    }
+
+    public List<Comment> getCommentsByAnswerId(Long id) {
+        return commentRepository.findCommentsByAnswerId(id);
     }
 
     public Comment add(Question question, Comment comment) {
@@ -42,32 +46,29 @@ public class CommentService {
                         .build());
     }
 
-    public void addNewComment(Answer answer, String message) {
-        Comment comment = Comment.builder()
-                .message(message)
-                .answer(answer).build();
-        commentRepository.save(comment);
+    public void add(Answer answer, Comment comment) {
+        commentRepository.save(
+                Comment.builder()
+                        .message(comment.getMessage())
+                        .answer(answer)
+                        .build());
     }
 
-    public Question update(Long id, String message) {
-        Comment comment = findCommentById(id);
-        comment.setMessage(message);
+    public Comment update(Long id, Comment updatedComment) {
+        Comment comment = getCommentById(id);
+        comment.setMessage(updatedComment.getMessage());
         comment.setEditedCount(comment.getEditedCount() + 1);
         comment.setSubmissionTime(LocalDateTime.now());
-        commentRepository.save(comment);
-        return getQuestion(comment);
+        return commentRepository.save(comment);
     }
 
-    public Question delete(Long id) {
-        Comment comment = findCommentById(id);
+    public boolean isBoundedToQuestion(Comment comment) {
+        return comment.getQuestion() != null;
+    }
+
+    public Comment delete(Long id) {
+        Comment comment = getCommentById(id);
         commentRepository.delete(comment);
-        return getQuestion(comment);
-    }
-
-    private Question getQuestion(Comment comment) {
-        if (comment.getQuestion() != null) {
-            return comment.getQuestion();
-        }
-        return comment.getAnswer().getQuestion();
+        return comment;
     }
 }

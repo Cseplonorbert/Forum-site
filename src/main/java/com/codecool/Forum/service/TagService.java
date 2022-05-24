@@ -15,7 +15,7 @@ import java.util.Optional;
 @Service
 public class TagService {
 
-    TagRepository tagRepository;
+    private final TagRepository tagRepository;
 
     @Autowired
     public TagService(TagRepository tagRepository) {
@@ -35,28 +35,28 @@ public class TagService {
         if (tag.isPresent()) {
             return tag.get();
         }
-        throw new TagNotFoundException("Tag not found");
+        throw new TagNotFoundException(id);
     }
 
-    public Tag add(String tagName, Question question) {
+    public void add(String tagName, Question question) {
         Optional<Tag> tag = getTagByName(tagName.toLowerCase());
         if (!tag.isPresent()) {
             tag = Optional.of(Tag.builder().name(tagName.toLowerCase()).build());
         }
         List<Question> questions = tag.get().getQuestions();
         if (question.getTags().contains(tag.get())) {
-            throw new TagAlreadyAddedToQuestionException("Tag already added to the question");
+            throw new TagAlreadyAddedToQuestionException(question.getId(), tag.get().getId());
         }
         questions.add(question);
         tag.get().setQuestions(questions);
-        return tagRepository.save(tag.get());
+        tagRepository.save(tag.get());
     }
 
     public void removeTagFromQuestion(Tag tag, Question question) {
         List<Question> questions = tag.getQuestions();
         boolean removed = questions.remove(question);
         if (!removed) {
-            throw new TagNotBeenAddedToQuestionException("Tag not been added to this question");
+            throw new TagNotBeenAddedToQuestionException(question.getId(), tag.getId());
         }
         tag.setQuestions(questions);
         tagRepository.save(tag);

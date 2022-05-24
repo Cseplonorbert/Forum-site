@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class QuestionPreviewAssembler implements RepresentationModelAssembler<Question,
         EntityModel<QuestionPreview>> {
 
-    QuestionQuestionPreviewMapper questionQuestionPreviewMapper;
+    private final QuestionQuestionPreviewMapper questionQuestionPreviewMapper;
 
     @Autowired
     public QuestionPreviewAssembler(QuestionQuestionPreviewMapper questionQuestionPreviewMapper) {
