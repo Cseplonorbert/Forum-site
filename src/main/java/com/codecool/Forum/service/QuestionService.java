@@ -47,12 +47,16 @@ public class QuestionService {
         return PageRequest.of(page, pageSize, sort);
     }
 
+    public boolean existsById(Long id) {
+        return questionRepository.existsById(id);
+    }
+
     public Question getQuestionById(Long id) {
         Optional<Question> question = questionRepository.findQuestionById(id);
         if (question.isPresent()) {
             return question.get();
         }
-        throw new QuestionNotFoundException("Question not found");
+        throw new QuestionNotFoundException(id);
     }
 
     public Question add(Question question) {
