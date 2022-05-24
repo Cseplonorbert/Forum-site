@@ -59,4 +59,21 @@ public class AnswerService {
         answerRepository.save(answer);
         return answer.getQuestion();
     }
+
+    public Question upVote(Long id) {
+        Answer answer = getAnswerById(id);
+        Vote vote = Vote.UP;
+        return vote(answer, vote);
+    }
+
+    public Question downVote(Long id) {
+        Answer answer = getAnswerById(id);
+        Vote vote = Vote.DOWN;
+        return vote(answer, vote);
+    }
+
+    private Question vote(Answer answer, Vote vote) {
+        answer.setVoteNumber(answer.getVoteNumber() + vote.getValue());
+        return answerRepository.save(answer).getQuestion();
+    }
 }

@@ -47,21 +47,26 @@ public class AnswerController {
 
     @DeleteMapping("/answers/{answer_id}")
     public CollectionModel<EntityModel<AnswerView>> deleteAnswer(@PathVariable Long answer_id) {
-            Question question = answerService.deleteAnswer(answer_id);
-            return getAllAnswersByQuestionId(question.getId());
+        Question question = answerService.deleteAnswer(answer_id);
+        return getAllAnswersByQuestionId(question.getId());
     }
 
-    @PutMapping("/answers/{answer_id}/vote")
-    public CollectionModel<EntityModel<AnswerView>> voteOnAnswer(@PathVariable Long answer_id,
-                                               @RequestParam(name = "vote_method") String vote) {
-            Question question = answerService.voteOnAnswer(answer_id, vote);
-            return getAllAnswersByQuestionId(question.getId());
+    @PutMapping("/answers/{answerId}")
+    public CollectionModel<EntityModel<AnswerView>> update(@PathVariable Long answerId,
+                                                           @RequestParam String message) {
+        Question question = answerService.update(answerId, message);
+        return getAllAnswersByQuestionId(question.getId());
     }
 
-    @PutMapping("/answers/{answer_id}")
-    public CollectionModel<EntityModel<AnswerView>> update(@PathVariable Long answer_id,
-                                           @RequestParam String message) {
-            Question question = answerService.update(answer_id, message);
-            return getAllAnswersByQuestionId(question.getId());
+    @PostMapping("/answers/{answerId}/up_vote")
+    public CollectionModel<EntityModel<AnswerView>> upVote(@PathVariable Long answerId) {
+        Question question = answerService.upVote(answerId);
+        return getAllAnswersByQuestionId(question.getId());
+    }
+
+    @PostMapping("/answers/{answerId}/down_vote")
+    public CollectionModel<EntityModel<AnswerView>> downVote(@PathVariable Long answerId) {
+        Question question = answerService.downVote(answerId);
+        return getAllAnswersByQuestionId(question.getId());
     }
 }
