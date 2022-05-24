@@ -22,4 +22,13 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(AnswerNotFoundException.class)
+    public ResponseEntity<Object> handleAnswerNotFoundException(AnswerNotFoundException exc, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamps", LocalDateTime.now());
+        body.put("message", exc.getMessage());
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
 }

@@ -37,7 +37,7 @@ public class AnswerService {
         if (answer.isPresent()) {
             return answer.get();
         }
-        throw new AnswerNotFoundException("Answer Not Found");
+        throw new AnswerNotFoundException(id);
     }
 
     public Question deleteAnswer(Long id) {
