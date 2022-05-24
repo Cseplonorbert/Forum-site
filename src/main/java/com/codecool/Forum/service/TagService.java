@@ -15,7 +15,7 @@ import java.util.Optional;
 @Service
 public class TagService {
 
-    TagRepository tagRepository;
+    private final TagRepository tagRepository;
 
     @Autowired
     public TagService(TagRepository tagRepository) {

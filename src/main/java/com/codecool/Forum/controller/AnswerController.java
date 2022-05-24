@@ -15,8 +15,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/answer")
 public class AnswerController {
 
-    AnswerService answerService;
-    CommentService commentService;
+    private final AnswerService answerService;
+    private final CommentService commentService;
 
     @Autowired
     public AnswerController (AnswerService answerService, CommentService commentService) {

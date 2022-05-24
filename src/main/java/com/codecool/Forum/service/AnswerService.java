@@ -14,7 +14,7 @@ import java.util.Optional;
 @Service
 public class AnswerService {
 
-    AnswerRepository answerRepository;
+    private final AnswerRepository answerRepository;
 
     @Autowired
     public AnswerService(AnswerRepository answerRepository) {

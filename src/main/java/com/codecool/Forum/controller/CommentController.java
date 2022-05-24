@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/comment")
 public class CommentController {
 
-    CommentService commentService;
+    private final CommentService commentService;
 
     public CommentController(CommentService commentService) {
         this.commentService = commentService;
