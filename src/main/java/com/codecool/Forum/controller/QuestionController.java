@@ -83,39 +83,39 @@ public class QuestionController {
 
     @GetMapping("/questions/{id}")
     public EntityModel<QuestionView> get(@PathVariable Long id) {
-            return questionViewAssembler.toModel(questionService.getQuestionById(id));
+        return questionViewAssembler.toModel(questionService.getQuestionById(id));
     }
 
     @PostMapping("/questions/add")
     public ResponseEntity<EntityModel<QuestionView>> add(@RequestBody Question question) {
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(questionViewAssembler
-                            .toModel(questionService.add(question)));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(questionViewAssembler
+                        .toModel(questionService.add(question)));
     }
 
     @PutMapping("/questions/{id}/edit")
     public ResponseEntity<EntityModel<QuestionView>> update(@PathVariable Long id, Question question) {
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(questionViewAssembler
-                            .toModel(questionService.update(id, question)));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(questionViewAssembler
+                        .toModel(questionService.update(id, question)));
     }
 
     @DeleteMapping("/questions/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-            questionService.delete(id);
-            return ResponseEntity.noContent().build();
+        questionService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/questions/{id}/down_vote")
     public EntityModel<QuestionView> downVote(@PathVariable Long id) {
-            return questionViewAssembler.toModel(questionService.downVote(id));
+        return questionViewAssembler.toModel(questionService.downVote(id));
     }
 
     @PostMapping("/questions/{id}/up_vote")
     public EntityModel<QuestionView> upVote(@PathVariable Long id) {
-            return questionViewAssembler.toModel(questionService.upVote(id));
+        return questionViewAssembler.toModel(questionService.upVote(id));
     }
 
     @GetMapping("/questions/{id}/comments")
@@ -125,16 +125,16 @@ public class QuestionController {
 
     @PostMapping("/questions/{id}/comments/add")
     public ResponseEntity<EntityModel<CommentView>> addComment(@PathVariable Long id, @RequestBody Comment comment) {
-            Question question = questionService.getQuestionById(id);
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(commentViewAssembler.toModel(commentService.add(question, comment)));
+        Question question = questionService.getQuestionById(id);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(commentViewAssembler.toModel(commentService.add(question, comment)));
     }
 
     @GetMapping("/questions/{id}tags")
     public CollectionModel<EntityModel<TagView>> getTags(@PathVariable Long id) {
-            Question question = questionService.getQuestionById(id);
-            return tagViewAssembler.toCollectionModel(tagService.getTagsByQuestion(question));
+        Question question = questionService.getQuestionById(id);
+        return tagViewAssembler.toCollectionModel(tagService.getTagsByQuestion(question));
     }
 
     @PostMapping("/questions/{id}/tags/add")
