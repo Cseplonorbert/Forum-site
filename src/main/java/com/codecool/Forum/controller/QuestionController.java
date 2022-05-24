@@ -27,8 +27,6 @@ public class QuestionController {
     private final QuestionPreviewAssembler questionPreviewAssembler;
     private final QuestionViewAssembler questionViewAssembler;
     private final PagedResourcesAssembler<Question> pagedResourcesAssembler;
-    private final CommentService commentService;
-    private final CommentViewAssembler commentViewAssembler;
     private final TagViewAssembler tagViewAssembler;
 
     @Autowired
@@ -37,16 +35,12 @@ public class QuestionController {
                               QuestionPreviewAssembler questionPreviewAssembler,
                               QuestionViewAssembler questionViewAssembler,
                               PagedResourcesAssembler<Question> pagedResourcesAssembler,
-                              CommentService commentService,
-                              CommentViewAssembler commentViewAssembler,
                               TagViewAssembler tagViewAssembler) {
         this.questionService = questionService;
         this.tagService = tagService;
         this.questionPreviewAssembler = questionPreviewAssembler;
         this.questionViewAssembler = questionViewAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
-        this.commentService = commentService;
-        this.commentViewAssembler = commentViewAssembler;
         this.tagViewAssembler = tagViewAssembler;
     }
 
@@ -94,7 +88,7 @@ public class QuestionController {
                         .toModel(questionService.add(question)));
     }
 
-    @PutMapping("/questions/{id}/edit")
+    @PutMapping("/questions/{id}")
     public ResponseEntity<EntityModel<QuestionView>> update(@PathVariable Long id, Question question) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -116,19 +110,6 @@ public class QuestionController {
     @PostMapping("/questions/{id}/up_vote")
     public EntityModel<QuestionView> upVote(@PathVariable Long id) {
         return questionViewAssembler.toModel(questionService.upVote(id));
-    }
-
-    @GetMapping("/questions/{id}/comments")
-    public CollectionModel<EntityModel<CommentView>> getComments(@PathVariable Long id) {
-        return commentViewAssembler.toCollectionModel(commentService.getCommentsByQuestionId(id));
-    }
-
-    @PostMapping("/questions/{id}/comments/add")
-    public ResponseEntity<EntityModel<CommentView>> addComment(@PathVariable Long id, @RequestBody Comment comment) {
-        Question question = questionService.getQuestionById(id);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(commentViewAssembler.toModel(commentService.add(question, comment)));
     }
 
     @GetMapping("/questions/{id}tags")

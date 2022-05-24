@@ -3,6 +3,7 @@ package com.codecool.Forum.assembler;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import com.codecool.Forum.controller.AnswerController;
+import com.codecool.Forum.controller.CommentController;
 import com.codecool.Forum.controller.QuestionController;
 import com.codecool.Forum.mapper.QuestionQuestionViewMapper;
 import com.codecool.Forum.model.Question;
@@ -31,7 +32,7 @@ public class QuestionViewAssembler implements RepresentationModelAssembler<Quest
                 linkTo(methodOn(QuestionController.class).get(questionView.getId())).withSelfRel(),
                 linkTo(methodOn(AnswerController.class)
                         .getAllAnswersByQuestionId(questionView.getId())).withRel("answers"),
-                linkTo(methodOn(QuestionController.class).getComments(questionView.getId())).withRel("comments"),
+                linkTo(methodOn(CommentController.class).getAllByQuestionId(questionView.getId())).withRel("comments"),
                 linkTo(methodOn(QuestionController.class).getTags(questionView.getId())).withRel("tags"));
     }
 }

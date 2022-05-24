@@ -21,6 +21,10 @@ public class AnswerService {
         this.answerRepository = answerRepository;
     }
 
+    public boolean existsById(Long id) {
+        return answerRepository.existsById(id);
+    }
+
     public Answer add(Question question, Answer answer) {
         return answerRepository.save(Answer.builder()
                 .message(answer.getMessage())
