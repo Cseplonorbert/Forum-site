@@ -66,4 +66,13 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(PageNotFoundException.class)
+    public ResponseEntity<Object> handlePageNotFoundException(PageNotFoundException exc) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamps", LocalDateTime.now());
+        body.put("message", exc.getMessage());
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
 }
