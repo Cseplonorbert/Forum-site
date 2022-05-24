@@ -1,8 +1,10 @@
 package com.codecool.Forum.service;
 
-import com.codecool.Forum.exception.IllegalPageSizeException;
+import static com.codecool.Forum.service.constants.QuestionServiceConstants.*;
+
+import com.codecool.Forum.exception.PageNotFoundException;
 import com.codecool.Forum.exception.QuestionNotFoundException;
-import com.codecool.Forum.model.OrderBy;
+import com.codecool.Forum.model.SortBy;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.model.Vote;
 import com.codecool.Forum.reporsitory.QuestionRepository;
@@ -25,26 +27,50 @@ public class QuestionService {
         this.questionRepository = questionRepository;
     }
 
-    public Page<Question> findAll(String order, String orderBy, Integer page, Integer pageSize) {
-        Pageable pageable = getPageable(order, orderBy, page, pageSize);
-        return questionRepository.findAll(pageable);
+    public Page<Question> findAll(String direction, String sortBy, Integer page, Integer pageSize) {
+        Pageable pageable = getPageable(direction, sortBy, page, pageSize);
+        Page<Question> results = questionRepository.findAll(pageable);
+        if (results.getTotalPages() < pageable.getPageNumber()) {
+            throw new PageNotFoundException(pageable.getPageNumber(), results.getTotalPages());
+        }
+        return results;
     }
 
-    public Page<Question> search(String phrase, String order, String orderBy, Integer page, Integer pageSize) {
-        Pageable pageable = getPageable(order, orderBy, page, pageSize);
-        return questionRepository.
-                findByTitleContainingIgnoreCaseOrMessageContainingIgnoreCase(pageable, phrase, phrase);
+    public Page<Question> search(String phrase, String direction, String sortBy, Integer page, Integer pageSize) {
+        Pageable pageable = getPageable(direction, sortBy, page, pageSize);
+        Page<Question> results = questionRepository
+                .findByTitleContainingIgnoreCaseOrMessageContainingIgnoreCase(pageable, phrase, phrase);
+        if (results.getTotalPages() < pageable.getPageNumber()) {
+            throw new PageNotFoundException(pageable.getPageNumber(), results.getTotalPages());
+        }
+        return results;
     }
 
-    private Pageable getPageable(String order, String orderBy, Integer page, Integer pageSize) {
-        Sort sort = Sort.by(Sort.Direction.valueOf(order),
-                OrderBy.valueOf(orderBy).getFieldName());
-
-        if (pageSize > 50 || pageSize < 1) {
-            throw new IllegalPageSizeException("Invalid pageSize, it must be between 1 and 50");
+    private Pageable getPageable(String direction, String sortBy, Integer page, Integer pageSize) {
+        if (pageSize > MAX_PAGE_SIZE || pageSize < MIN_PAGE_SIZE) {
+            pageSize = DEFAULT_PAGE_SIZE;
         }
 
+        Sort sort = Sort.by(directionOfString(direction).orElse(DEFAULT_DIRECTION),
+                orderByOfString(sortBy).orElse(DEFAULT_SORT_BY).getFieldName());
+
         return PageRequest.of(page, pageSize, sort);
+    }
+
+    private Optional<Sort.Direction> directionOfString(String direction) {
+        try {
+            return Optional.of(Sort.Direction.valueOf(direction));
+        } catch (IllegalArgumentException exc) {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<SortBy> orderByOfString(String sortBy) {
+        try {
+            return Optional.of(SortBy.valueOf(sortBy));
+        } catch (IllegalArgumentException exc) {
+            return Optional.empty();
+        }
     }
 
     public boolean existsById(Long id) {

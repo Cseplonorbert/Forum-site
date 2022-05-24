@@ -1,7 +1,8 @@
 package com.codecool.Forum.controller;
 
+import static com.codecool.Forum.controller.constants.QuestionControllerConstants.*;
+
 import com.codecool.Forum.assembler.*;
-import com.codecool.Forum.exception.*;
 import com.codecool.Forum.model.*;
 import com.codecool.Forum.model.view.*;
 import com.codecool.Forum.service.QuestionService;
@@ -13,7 +14,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api")
@@ -37,33 +37,23 @@ public class QuestionController {
 
     @GetMapping("/questions")
     public PagedModel<EntityModel<QuestionPreview>> all(
-                                                        @RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
-                                                        @RequestParam(defaultValue = "DESC") String order,
-                                                        @RequestParam(defaultValue = "0") Integer page,
-                                                        @RequestParam(defaultValue = "15") Integer pageSize) {
-        try {
+                                                @RequestParam(defaultValue = DEFAULT_SORT) String sort,
+                                                @RequestParam(defaultValue = DEFAULT_ORDER) String order,
+                                                @RequestParam(defaultValue = DEFAULT_PAGE) Integer page,
+                                                @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) Integer pageSize) {
             Page<Question> questions = questionService.findAll(order, sort, page, pageSize);
             return pagedResourcesAssembler.toModel(questions, questionPreviewAssembler);
-        } catch (IllegalArgumentException | IllegalPageSizeException exc) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
-        }
     }
 
     @GetMapping("/questions/search")
     public  PagedModel<EntityModel<QuestionPreview>> search(
-                                                        @RequestParam(defaultValue = "SUBMISSION_TIME") String sort,
-                                                        @RequestParam(defaultValue = "DESC") String order,
-                                                        @RequestParam(defaultValue = "0") Integer page,
-                                                        @RequestParam(defaultValue = "15") Integer pageSize,
-                                                        @RequestParam String phrase) {
-        try {
+                                                @RequestParam(defaultValue = DEFAULT_SORT) String sort,
+                                                @RequestParam(defaultValue = DEFAULT_ORDER) String order,
+                                                @RequestParam(defaultValue = DEFAULT_PAGE) Integer page,
+                                                @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) Integer pageSize,
+                                                @RequestParam String phrase) {
             Page<Question> questions = questionService.search(phrase, order, sort, page, pageSize);
             return pagedResourcesAssembler.toModel(questions, questionPreviewAssembler);
-        } catch (IllegalArgumentException | IllegalPageSizeException exc) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
-        }
     }
 
     @GetMapping("/questions/{id}")

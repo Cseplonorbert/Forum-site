@@ -1,6 +1,6 @@
 package com.codecool.Forum.model;
 
-public enum OrderBy {
+public enum SortBy {
     TITLE("title"),
     SUBMISSION_TIME("submissionTime"),
     DESCRIPTION("message"),
@@ -9,7 +9,7 @@ public enum OrderBy {
 
     private final String fieldName;
 
-    OrderBy(String fieldName) {
+    SortBy(String fieldName) {
         this.fieldName = fieldName;
     }
 
