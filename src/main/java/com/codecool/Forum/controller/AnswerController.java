@@ -45,9 +45,14 @@ public class AnswerController {
         return getAllAnswersByQuestionId(questionId);
     }
 
-    @DeleteMapping("/answers/{answer_id}")
-    public CollectionModel<EntityModel<AnswerView>> deleteAnswer(@PathVariable Long answer_id) {
-        Question question = answerService.deleteAnswer(answer_id);
+    @GetMapping("answers/{answerId}")
+    public EntityModel<AnswerView> getAnswerById(@PathVariable Long answerId) {
+        return answerViewAssembler.toModel(answerService.getAnswerById(answerId));
+    }
+
+    @DeleteMapping("/answers/{answerId}")
+    public CollectionModel<EntityModel<AnswerView>> deleteAnswer(@PathVariable Long answerId) {
+        Question question = answerService.deleteAnswer(answerId);
         return getAllAnswersByQuestionId(question.getId());
     }
 
