@@ -18,6 +18,7 @@ public class QuestionQuestionPreviewMapperImpl
         }
         return QuestionPreview.builder()
                 .id(question.getId())
+                .title(question.getTitle())
                 .viewNumber(question.getViewNumber())
                 .voteNumber(question.getVoteNumber())
                 .submissionTime(question.getSubmissionTime())
