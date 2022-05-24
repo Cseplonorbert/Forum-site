@@ -4,13 +4,10 @@ import com.codecool.Forum.assembler.*;
 import com.codecool.Forum.exception.*;
 import com.codecool.Forum.model.*;
 import com.codecool.Forum.model.view.*;
-import com.codecool.Forum.service.CommentService;
 import com.codecool.Forum.service.QuestionService;
-import com.codecool.Forum.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -23,25 +20,19 @@ import org.springframework.web.server.ResponseStatusException;
 public class QuestionController {
 
     private final QuestionService questionService;
-    private final TagService tagService;
     private final QuestionPreviewAssembler questionPreviewAssembler;
     private final QuestionViewAssembler questionViewAssembler;
     private final PagedResourcesAssembler<Question> pagedResourcesAssembler;
-    private final TagViewAssembler tagViewAssembler;
 
     @Autowired
     public QuestionController(QuestionService questionService,
-                              TagService tagService,
                               QuestionPreviewAssembler questionPreviewAssembler,
                               QuestionViewAssembler questionViewAssembler,
-                              PagedResourcesAssembler<Question> pagedResourcesAssembler,
-                              TagViewAssembler tagViewAssembler) {
+                              PagedResourcesAssembler<Question> pagedResourcesAssembler) {
         this.questionService = questionService;
-        this.tagService = tagService;
         this.questionPreviewAssembler = questionPreviewAssembler;
         this.questionViewAssembler = questionViewAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
-        this.tagViewAssembler = tagViewAssembler;
     }
 
     @GetMapping("/questions")
@@ -110,35 +101,5 @@ public class QuestionController {
     @PostMapping("/questions/{id}/up_vote")
     public EntityModel<QuestionView> upVote(@PathVariable Long id) {
         return questionViewAssembler.toModel(questionService.upVote(id));
-    }
-
-    @GetMapping("/questions/{id}tags")
-    public CollectionModel<EntityModel<TagView>> getTags(@PathVariable Long id) {
-        Question question = questionService.getQuestionById(id);
-        return tagViewAssembler.toCollectionModel(tagService.getTagsByQuestion(question));
-    }
-
-    @PostMapping("/questions/{id}/tags/add")
-    public EntityModel<TagView> addTag(@PathVariable Long id, @RequestParam String tagName) {
-        try {
-            Question question = questionService.getQuestionById(id);
-            return tagViewAssembler.toModel(tagService.add(tagName, question));
-        } catch (TagAlreadyAddedToQuestionException exc) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
-        }
-    }
-
-    @DeleteMapping("/questions/{id}/tags/delete/{tag_id}")
-    public ResponseEntity<Void> deleteTag(@PathVariable Long id, @PathVariable Long tag_id) {
-        try {
-            Question question = questionService.getQuestionById(id);
-            Tag tag = tagService.getTagById(tag_id);
-            tagService.removeTagFromQuestion(tag, question);
-            return ResponseEntity.noContent().build();
-        } catch (TagNotFoundException exc) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, exc.getMessage(), exc);
-        } catch (TagNotBeenAddedToQuestionException exc) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exc.getMessage(), exc);
-        }
     }
 }

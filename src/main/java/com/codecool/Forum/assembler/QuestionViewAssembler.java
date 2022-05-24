@@ -5,6 +5,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import com.codecool.Forum.controller.AnswerController;
 import com.codecool.Forum.controller.CommentController;
 import com.codecool.Forum.controller.QuestionController;
+import com.codecool.Forum.controller.TagController;
 import com.codecool.Forum.mapper.QuestionQuestionViewMapper;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.model.view.QuestionView;
@@ -33,6 +34,6 @@ public class QuestionViewAssembler implements RepresentationModelAssembler<Quest
                 linkTo(methodOn(AnswerController.class)
                         .getAllAnswersByQuestionId(questionView.getId())).withRel("answers"),
                 linkTo(methodOn(CommentController.class).getAllByQuestionId(questionView.getId())).withRel("comments"),
-                linkTo(methodOn(QuestionController.class).getTags(questionView.getId())).withRel("tags"));
+                linkTo(methodOn(TagController.class).getAllByQuestionId(questionView.getId())).withRel("tags"));
     }
 }
