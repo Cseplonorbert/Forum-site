@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "comment")
@@ -29,9 +28,9 @@ public class Comment {
     private Answer answer;
 
     @Column(name = "edited_count")
-    @Builder.Default private int editedCount = 0;
+    private int editedCount = 0;
 
     @Column(name = "submission_time")
-    @Builder.Default private LocalDateTime submissionTime = LocalDateTime.now();
+    private LocalDateTime submissionTime = LocalDateTime.now();
 
 }
