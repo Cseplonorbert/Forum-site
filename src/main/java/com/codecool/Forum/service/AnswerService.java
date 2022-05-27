@@ -1,83 +1,87 @@
 package com.codecool.Forum.service;
 
 import com.codecool.Forum.exception.AnswerNotFoundException;
+import com.codecool.Forum.mapper.AnswerDtoMapper;
 import com.codecool.Forum.model.Answer;
-import com.codecool.Forum.model.Question;
 import com.codecool.Forum.model.Vote;
+import com.codecool.Forum.model.dto.AnswerGetDto;
+import com.codecool.Forum.model.dto.AnswerPostDto;
+import com.codecool.Forum.model.dto.QuestionGetDto;
 import com.codecool.Forum.reporsitory.AnswerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AnswerService {
 
     private final AnswerRepository answerRepository;
+    private final QuestionService questionService;
+    private final AnswerDtoMapper answerDtoMapper;
 
     @Autowired
-    public AnswerService(AnswerRepository answerRepository) {
+    public AnswerService(AnswerRepository answerRepository,
+                         QuestionService questionService,
+                         AnswerDtoMapper answerDtoMapper) {
         this.answerRepository = answerRepository;
+        this.questionService = questionService;
+        this.answerDtoMapper = answerDtoMapper;
     }
 
     public boolean existsById(Long id) {
         return answerRepository.existsById(id);
     }
 
-    public Answer add(Question question, Answer answer) {
-        return answerRepository.save(Answer.builder()
-                .message(answer.getMessage())
-                .question(question)
-                .build());
+    public AnswerGetDto add(Long questionId, AnswerPostDto answerPostDto) {
+        QuestionGetDto questionGetDto = questionService.getQuestionById(questionId);
+        answerPostDto.setQuestionGetDto(questionGetDto);
+        Answer answer = answerRepository.save(answerDtoMapper.answerPostDtoToAnswer(answerPostDto));
+        return answerDtoMapper.answerToAnswerGetDto(answer);
     }
 
-    public List<Answer> getAnswersByQuestionId(Long id) {
-        return answerRepository.findAnswersByQuestionId(id);
+    public List<AnswerGetDto> getAnswersByQuestionId(Long questionId) {
+        return answerRepository.findAnswersByQuestionId(questionId)
+                .stream().map(answerDtoMapper::answerToAnswerGetDto).collect(Collectors.toList());
     }
 
-    public Answer getAnswerById(Long id) {
-        Optional<Answer> answer = answerRepository.findById(id);
+    public AnswerGetDto getAnswerById(Long answerId) {
+        Optional<Answer> answer = answerRepository.findById(answerId);
         if (answer.isPresent()) {
-            return answer.get();
+            return answerDtoMapper.answerToAnswerGetDto(answer.get());
         }
-        throw new AnswerNotFoundException(id);
+        throw new AnswerNotFoundException(answerId);
     }
 
-    public Question deleteAnswer(Long id) {
-        Answer answer = getAnswerById(id);
-        answerRepository.delete(answer);
-        return answer.getQuestion();
+    public void deleteAnswer(Long answerId) {
+        AnswerGetDto answerGetDto = getAnswerById(answerId);
+        answerRepository.delete(answerDtoMapper.answerGetDtoToAnswer(answerGetDto));
     }
 
-    public Question voteOnAnswer(Long id, String vote) {
-        Answer answer = getAnswerById(id);
-        Vote voteDir = Vote.valueOf(vote);
-        answer.setVoteNumber(answer.getVoteNumber() + voteDir.getValue());
-        return answer.getQuestion();
+    public AnswerGetDto update(Long answerId, AnswerPostDto answerPostDto) {
+        AnswerGetDto answerGetDto = getAnswerById(answerId);
+        answerGetDto.setMessage(answerPostDto.getMessage());
+        return answerDtoMapper.answerToAnswerGetDto(
+                answerRepository.save(answerDtoMapper.answerGetDtoToAnswer(answerGetDto)));
     }
 
-    public Question update(Long id, Answer updatedAnswer) {
-        Answer answer = getAnswerById(id);
-        answer.setMessage(updatedAnswer.getMessage());
-        answerRepository.save(answer);
-        return answer.getQuestion();
-    }
-
-    public Question upVote(Long id) {
-        Answer answer = getAnswerById(id);
+    public AnswerGetDto upVote(Long answerId) {
+        AnswerGetDto answerGetDto = getAnswerById(answerId);
         Vote vote = Vote.UP;
-        return vote(answer, vote);
+        return vote(answerGetDto, vote);
     }
 
-    public Question downVote(Long id) {
-        Answer answer = getAnswerById(id);
+    public AnswerGetDto downVote(Long answerId) {
+        AnswerGetDto answerGetDto = getAnswerById(answerId);
         Vote vote = Vote.DOWN;
-        return vote(answer, vote);
+        return vote(answerGetDto, vote);
     }
 
-    private Question vote(Answer answer, Vote vote) {
-        answer.setVoteNumber(answer.getVoteNumber() + vote.getValue());
-        return answerRepository.save(answer).getQuestion();
+    private AnswerGetDto vote(AnswerGetDto answerGetDto, Vote vote) {
+        answerGetDto.setVoteNumber(answerGetDto.getVoteNumber() + vote.getValue());
+        return answerDtoMapper.answerToAnswerGetDto(
+                answerRepository.save(answerDtoMapper.answerGetDtoToAnswer(answerGetDto)));
     }
 }

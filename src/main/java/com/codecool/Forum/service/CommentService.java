@@ -1,9 +1,12 @@
 package com.codecool.Forum.service;
 
 import com.codecool.Forum.exception.CommentNotFoundException;
-import com.codecool.Forum.model.Answer;
+import com.codecool.Forum.mapper.CommentDtoMapper;
 import com.codecool.Forum.model.Comment;
-import com.codecool.Forum.model.Question;
+import com.codecool.Forum.model.dto.AnswerGetDto;
+import com.codecool.Forum.model.dto.CommentGetDto;
+import com.codecool.Forum.model.dto.CommentPostDto;
+import com.codecool.Forum.model.dto.QuestionGetDto;
 import com.codecool.Forum.reporsitory.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,64 +14,70 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final CommentDtoMapper commentDtoMapper;
+    private final QuestionService questionService;
+    private final AnswerService answerService;
 
     @Autowired
-    public CommentService(CommentRepository commentRepository) {
+    public CommentService(CommentRepository commentRepository,
+                          CommentDtoMapper commentDtoMapper,
+                          QuestionService questionService,
+                          AnswerService answerService) {
         this.commentRepository = commentRepository;
+        this.commentDtoMapper = commentDtoMapper;
+        this.questionService = questionService;
+        this.answerService = answerService;
     }
 
-    public Comment getCommentById(Long id) {
+    public CommentGetDto getCommentById(Long id) {
         Optional<Comment> comment = commentRepository.findById(id);
         if (comment.isPresent()) {
-            return comment.get();
+            return commentDtoMapper.commentToCommentGetDto(comment.get());
         }
         throw new CommentNotFoundException(id);
     }
 
-    public List<Comment> getCommentsByQuestionId(Long id) {
-        return commentRepository.findCommentsByQuestionId(id);
+    public List<CommentGetDto> getCommentsByQuestionId(Long questionId) {
+        return commentRepository.findCommentsByQuestionId(questionId)
+                .stream().map(commentDtoMapper::commentToCommentGetDto).collect(Collectors.toList());
     }
 
-    public List<Comment> getCommentsByAnswerId(Long id) {
-        return commentRepository.findCommentsByAnswerId(id);
+    public List<CommentGetDto> getCommentsByAnswerId(Long answerId) {
+        return commentRepository.findCommentsByAnswerId(answerId)
+                .stream().map(commentDtoMapper::commentToCommentGetDto).collect(Collectors.toList());
     }
 
-    public Comment add(Question question, Comment comment) {
-        return commentRepository.save(
-                Comment.builder()
-                        .message(comment.getMessage())
-                        .question(question)
-                        .build());
+    public CommentGetDto addCommentToQuestion(Long questionId, CommentPostDto commentPostDto) {
+        QuestionGetDto questionGetDto = questionService.getQuestionById(questionId);
+        commentPostDto.setQuestionGetDto(questionGetDto);
+        return commentDtoMapper.commentToCommentGetDto(
+                commentRepository.save(commentDtoMapper.commentPostDtoToComment(commentPostDto)));
     }
 
-    public void add(Answer answer, Comment comment) {
-        commentRepository.save(
-                Comment.builder()
-                        .message(comment.getMessage())
-                        .answer(answer)
-                        .build());
+    public CommentGetDto addCommentToAnswer(Long answerId, CommentPostDto commentPostDto) {
+        AnswerGetDto answerGetDto = answerService.getAnswerById(answerId);
+        commentPostDto.setAnswerGetDto(answerGetDto);
+        return commentDtoMapper.commentToCommentGetDto(
+                commentRepository.save(commentDtoMapper.commentPostDtoToComment(commentPostDto)));
     }
 
-    public Comment update(Long id, Comment updatedComment) {
-        Comment comment = getCommentById(id);
-        comment.setMessage(updatedComment.getMessage());
-        comment.setEditedCount(comment.getEditedCount() + 1);
-        comment.setSubmissionTime(LocalDateTime.now());
-        return commentRepository.save(comment);
+    public CommentGetDto update(Long id, CommentPostDto commentPostDto) {
+        CommentGetDto commentGetDto = getCommentById(id);
+        commentGetDto.setMessage(commentPostDto.getMessage());
+        commentGetDto.setEditedCount(commentGetDto.getEditedCount() + 1);
+        commentGetDto.setSubmissionTime(LocalDateTime.now());
+        return commentDtoMapper.commentToCommentGetDto(
+                commentRepository.save(commentDtoMapper.commentGetDtoToComment(commentGetDto)));
     }
 
-    public boolean isBoundedToQuestion(Comment comment) {
-        return comment.getQuestion() != null;
-    }
-
-    public Comment delete(Long id) {
-        Comment comment = getCommentById(id);
-        commentRepository.delete(comment);
-        return comment;
+    public void delete(Long commentId) {
+        CommentGetDto commentGetDto = getCommentById(commentId);
+        commentRepository.delete(commentDtoMapper.commentGetDtoToComment(commentGetDto));
     }
 }

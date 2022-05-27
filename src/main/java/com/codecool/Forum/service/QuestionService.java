@@ -4,9 +4,12 @@ import static com.codecool.Forum.service.constants.QuestionServiceConstants.*;
 
 import com.codecool.Forum.exception.PageNotFoundException;
 import com.codecool.Forum.exception.QuestionNotFoundException;
+import com.codecool.Forum.mapper.QuestionDtoMapper;
 import com.codecool.Forum.model.SortBy;
 import com.codecool.Forum.model.Question;
 import com.codecool.Forum.model.Vote;
+import com.codecool.Forum.model.dto.QuestionGetDto;
+import com.codecool.Forum.model.dto.QuestionPostDto;
 import com.codecool.Forum.reporsitory.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,29 +24,32 @@ import java.util.Optional;
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
+    private final QuestionDtoMapper questionDtoMapper;
 
     @Autowired
-    public QuestionService(QuestionRepository questionRepository) {
+    public QuestionService(QuestionRepository questionRepository,
+                           QuestionDtoMapper questionDtoMapper) {
         this.questionRepository = questionRepository;
+        this.questionDtoMapper = questionDtoMapper;
     }
 
-    public Page<Question> findAll(String direction, String sortBy, Integer page, Integer pageSize) {
+    public Page<QuestionGetDto> findAll(String direction, String sortBy, Integer page, Integer pageSize) {
         Pageable pageable = getPageable(direction, sortBy, page, pageSize);
         Page<Question> results = questionRepository.findAll(pageable);
         if (results.getTotalPages() < pageable.getPageNumber()) {
             throw new PageNotFoundException(pageable.getPageNumber(), results.getTotalPages());
         }
-        return results;
+        return results.map(questionDtoMapper::questionToQuestionGetDto);
     }
 
-    public Page<Question> search(String phrase, String direction, String sortBy, Integer page, Integer pageSize) {
+    public Page<QuestionGetDto> search(String phrase, String direction, String sortBy, Integer page, Integer pageSize) {
         Pageable pageable = getPageable(direction, sortBy, page, pageSize);
         Page<Question> results = questionRepository
                 .findByTitleContainingIgnoreCaseOrMessageContainingIgnoreCase(pageable, phrase, phrase);
         if (results.getTotalPages() < pageable.getPageNumber()) {
             throw new PageNotFoundException(pageable.getPageNumber(), results.getTotalPages());
         }
-        return results;
+        return results.map(questionDtoMapper::questionToQuestionGetDto);
     }
 
     private Pageable getPageable(String direction, String sortBy, Integer page, Integer pageSize) {
@@ -77,46 +83,46 @@ public class QuestionService {
         return questionRepository.existsById(id);
     }
 
-    public Question getQuestionById(Long id) {
+    public QuestionGetDto getQuestionById(Long id) {
         Optional<Question> question = questionRepository.findQuestionById(id);
         if (question.isPresent()) {
-            return question.get();
+            return questionDtoMapper.questionToQuestionGetDto(question.get());
         }
         throw new QuestionNotFoundException(id);
     }
 
-    public Question add(Question question) {
-        return questionRepository.save(Question.builder()
-                .title(question.getTitle())
-                .message(question.getMessage())
-                .build());
+    public QuestionGetDto add(QuestionPostDto questionPostDto) {
+        Question question = questionRepository.save(questionDtoMapper.questionPostDtoToQuestion(questionPostDto));
+        return questionDtoMapper.questionToQuestionGetDto(question);
     }
 
     public void delete(Long id) {
-        Question question = getQuestionById(id);
-        questionRepository.delete(question);
+        QuestionGetDto questionGetDto = getQuestionById(id);
+        questionRepository.delete(questionDtoMapper.questionGetDtoToQuestion(questionGetDto));
     }
 
-    public Question update(Long id, Question editedQuestion) {
-        Question question = getQuestionById(id);
-        question.setTitle(editedQuestion.getTitle());
-        question.setMessage(editedQuestion.getMessage());
-        return questionRepository.save(question);
+    public QuestionGetDto update(Long id, QuestionPostDto questionPostDto) {
+        QuestionGetDto questionGetDto = getQuestionById(id);
+        questionGetDto.setTitle(questionPostDto.getTitle());
+        questionGetDto.setMessage(questionPostDto.getMessage());
+        Question question = questionRepository.save(questionDtoMapper.questionGetDtoToQuestion(questionGetDto));
+        return questionDtoMapper.questionToQuestionGetDto(question);
     }
 
-    public Question downVote(Long id) {
+    public QuestionGetDto downVote(Long id) {
         Vote vote = Vote.DOWN;
         return vote(vote, id);
     }
 
-    public Question upVote(Long id) {
+    public QuestionGetDto upVote(Long id) {
         Vote vote = Vote.UP;
         return vote(vote, id);
     }
 
-    private Question vote(Vote vote, Long id) {
-        Question question = getQuestionById(id);
-        question.setVoteNumber(question.getVoteNumber() + vote.getValue());
-        return questionRepository.save(question);
+    private QuestionGetDto vote(Vote vote, Long id) {
+        QuestionGetDto questionGetDto = getQuestionById(id);
+        questionGetDto.setVoteNumber(questionGetDto.getVoteNumber() + vote.getValue());
+        Question question = questionRepository.save(questionDtoMapper.questionGetDtoToQuestion(questionGetDto));
+        return questionDtoMapper.questionToQuestionGetDto(question);
     }
 }

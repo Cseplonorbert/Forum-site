@@ -3,8 +3,8 @@ package com.codecool.Forum.controller;
 import static com.codecool.Forum.controller.constants.QuestionControllerConstants.*;
 
 import com.codecool.Forum.assembler.*;
-import com.codecool.Forum.model.*;
-import com.codecool.Forum.model.view.*;
+import com.codecool.Forum.model.dto.QuestionGetDto;
+import com.codecool.Forum.model.dto.QuestionPostDto;
 import com.codecool.Forum.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,61 +20,59 @@ import org.springframework.web.bind.annotation.*;
 public class QuestionController {
 
     private final QuestionService questionService;
-    private final QuestionPreviewAssembler questionPreviewAssembler;
-    private final QuestionViewAssembler questionViewAssembler;
-    private final PagedResourcesAssembler<Question> pagedResourcesAssembler;
+    private final QuestionAssembler questionAssembler;
+    private final PagedResourcesAssembler<QuestionGetDto> pagedResourcesAssembler;
 
     @Autowired
     public QuestionController(QuestionService questionService,
-                              QuestionPreviewAssembler questionPreviewAssembler,
-                              QuestionViewAssembler questionViewAssembler,
-                              PagedResourcesAssembler<Question> pagedResourcesAssembler) {
+                              QuestionAssembler questionViewAssembler,
+                              PagedResourcesAssembler<QuestionGetDto> pagedResourcesAssembler) {
         this.questionService = questionService;
-        this.questionPreviewAssembler = questionPreviewAssembler;
-        this.questionViewAssembler = questionViewAssembler;
+        this.questionAssembler = questionViewAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @GetMapping("/questions")
-    public PagedModel<EntityModel<QuestionPreview>> all(
+    public PagedModel<EntityModel<QuestionGetDto>> all(
                                                 @RequestParam(defaultValue = DEFAULT_SORT) String sort,
                                                 @RequestParam(defaultValue = DEFAULT_ORDER) String order,
                                                 @RequestParam(defaultValue = DEFAULT_PAGE) Integer page,
                                                 @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) Integer pageSize) {
-            Page<Question> questions = questionService.findAll(order, sort, page, pageSize);
-            return pagedResourcesAssembler.toModel(questions, questionPreviewAssembler);
+            Page<QuestionGetDto> questions = questionService.findAll(order, sort, page, pageSize);
+            return pagedResourcesAssembler.toModel(questions, questionAssembler);
     }
 
     @GetMapping("/questions/search")
-    public  PagedModel<EntityModel<QuestionPreview>> search(
+    public  PagedModel<EntityModel<QuestionGetDto>> search(
                                                 @RequestParam(defaultValue = DEFAULT_SORT) String sort,
                                                 @RequestParam(defaultValue = DEFAULT_ORDER) String order,
                                                 @RequestParam(defaultValue = DEFAULT_PAGE) Integer page,
                                                 @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) Integer pageSize,
                                                 @RequestParam String phrase) {
-            Page<Question> questions = questionService.search(phrase, order, sort, page, pageSize);
-            return pagedResourcesAssembler.toModel(questions, questionPreviewAssembler);
+            Page<QuestionGetDto> questions = questionService.search(phrase, order, sort, page, pageSize);
+            return pagedResourcesAssembler.toModel(questions, questionAssembler);
     }
 
     @GetMapping("/questions/{id}")
-    public EntityModel<QuestionView> get(@PathVariable Long id) {
-        return questionViewAssembler.toModel(questionService.getQuestionById(id));
+    public EntityModel<QuestionGetDto> get(@PathVariable Long id) {
+        return questionAssembler.toModel(questionService.getQuestionById(id));
     }
 
     @PostMapping("/questions/add")
-    public ResponseEntity<EntityModel<QuestionView>> add(@RequestBody Question question) {
+    public ResponseEntity<EntityModel<QuestionGetDto>> add(@RequestBody QuestionPostDto questionPostDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(questionViewAssembler
-                        .toModel(questionService.add(question)));
+                .body(questionAssembler
+                        .toModel(questionService.add(questionPostDto)));
     }
 
     @PutMapping("/questions/{id}")
-    public ResponseEntity<EntityModel<QuestionView>> update(@PathVariable Long id, Question question) {
+    public ResponseEntity<EntityModel<QuestionGetDto>> update(@PathVariable Long id,
+                                                              @RequestBody QuestionPostDto questionPostDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(questionViewAssembler
-                        .toModel(questionService.update(id, question)));
+                .body(questionAssembler
+                        .toModel(questionService.update(id, questionPostDto)));
     }
 
     @DeleteMapping("/questions/{id}")
@@ -84,12 +82,12 @@ public class QuestionController {
     }
 
     @PostMapping("/questions/{id}/down_vote")
-    public EntityModel<QuestionView> downVote(@PathVariable Long id) {
-        return questionViewAssembler.toModel(questionService.downVote(id));
+    public EntityModel<QuestionGetDto> downVote(@PathVariable Long id) {
+        return questionAssembler.toModel(questionService.downVote(id));
     }
 
     @PostMapping("/questions/{id}/up_vote")
-    public EntityModel<QuestionView> upVote(@PathVariable Long id) {
-        return questionViewAssembler.toModel(questionService.upVote(id));
+    public EntityModel<QuestionGetDto> upVote(@PathVariable Long id) {
+        return questionAssembler.toModel(questionService.upVote(id));
     }
 }

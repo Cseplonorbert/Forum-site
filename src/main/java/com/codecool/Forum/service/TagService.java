@@ -3,62 +3,88 @@ package com.codecool.Forum.service;
 import com.codecool.Forum.exception.TagAlreadyAddedToQuestionException;
 import com.codecool.Forum.exception.TagNotBeenAddedToQuestionException;
 import com.codecool.Forum.exception.TagNotFoundException;
-import com.codecool.Forum.model.Question;
+import com.codecool.Forum.mapper.QuestionDtoMapper;
+import com.codecool.Forum.mapper.TagDtoMapper;
 import com.codecool.Forum.model.Tag;
+import com.codecool.Forum.model.dto.QuestionGetDto;
+import com.codecool.Forum.model.dto.TagGetDto;
+import com.codecool.Forum.model.dto.TagPostDto;
 import com.codecool.Forum.reporsitory.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TagService {
 
     private final TagRepository tagRepository;
+    private final QuestionService questionService;
+    private final TagDtoMapper tagDtoMapper;
+    private final QuestionDtoMapper questionDtoMapper;
 
     @Autowired
-    public TagService(TagRepository tagRepository) {
+    public TagService(TagRepository tagRepository,
+                      QuestionService questionService,
+                      TagDtoMapper tagDtoMapper,
+                      QuestionDtoMapper questionDtoMapper) {
         this.tagRepository = tagRepository;
+        this.questionService = questionService;
+        this.tagDtoMapper = tagDtoMapper;
+        this.questionDtoMapper = questionDtoMapper;
     }
 
-    public Optional<Tag> getTagByName(String tagName) {
-        return tagRepository.findByName(tagName);
+    public Optional<TagGetDto> getTagByName(String tagName) {
+        TagGetDto tagGetDto = tagDtoMapper.tagToTagGetDto(tagRepository.findByName(tagName));
+        if (tagGetDto == null) {
+            return Optional.empty();
+        }
+        return Optional.of(tagGetDto);
     }
 
-    public List<Tag> getTagsByQuestion(Question question) {
-        return tagRepository.getTagsByQuestionsContaining(question);
+    public List<TagGetDto> getTagsByQuestionId(Long questionId) {
+        QuestionGetDto questionGetDto = questionService.getQuestionById(questionId);
+        return tagRepository.getTagsByQuestionsContaining(
+                questionDtoMapper.questionGetDtoToQuestion(questionGetDto))
+                .stream().map(tagDtoMapper::tagToTagGetDto).collect(Collectors.toList());
     }
 
-    public Tag getTagById(Long id) {
+    public TagGetDto getTagById(Long id) {
         Optional<Tag> tag = tagRepository.findById(id);
         if (tag.isPresent()) {
-            return tag.get();
+            return tagDtoMapper.tagToTagGetDto(tag.get());
         }
         throw new TagNotFoundException(id);
     }
 
-    public void add(String tagName, Question question) {
-        Optional<Tag> tag = getTagByName(tagName.toLowerCase());
-        if (!tag.isPresent()) {
-            tag = Optional.of(Tag.builder().name(tagName.toLowerCase()).build());
+    public TagGetDto add(Long questionId, TagPostDto tagPostDto) {
+        Optional<TagGetDto> tagGetDto = getTagByName(tagPostDto.getName());
+        QuestionGetDto questionGetDto = questionService.getQuestionById(questionId);
+        if (tagGetDto.isPresent()) {
+            List<QuestionGetDto> questions = tagGetDto.get().getQuestions();
+            if (questions.contains(questionGetDto)) {
+                throw new TagAlreadyAddedToQuestionException(tagGetDto.get().getId(), questionGetDto.getId());
+            }
+            questions.add(questionGetDto);
+            tagGetDto.get().setQuestions(questions);
+            return tagDtoMapper.tagToTagGetDto(tagRepository.save(tagDtoMapper.tagGetDtoToTag(tagGetDto.get())));
         }
-        List<Question> questions = tag.get().getQuestions();
-        if (question.getTags().contains(tag.get())) {
-            throw new TagAlreadyAddedToQuestionException(question.getId(), tag.get().getId());
-        }
-        questions.add(question);
-        tag.get().setQuestions(questions);
-        tagRepository.save(tag.get());
+        List<QuestionGetDto> questions = new ArrayList<>();
+        questions.add(questionGetDto);
+        tagPostDto.setQuestions(questions);
+        return tagDtoMapper.tagToTagGetDto(tagRepository.save(tagDtoMapper.tagPostDtoToTag(tagPostDto)));
     }
 
-    public void removeTagFromQuestion(Tag tag, Question question) {
-        List<Question> questions = tag.getQuestions();
-        boolean removed = questions.remove(question);
-        if (!removed) {
-            throw new TagNotBeenAddedToQuestionException(question.getId(), tag.getId());
+    public void removeTagFromQuestion(Long questionId, Long tagId) {
+        TagGetDto tagGetDto = getTagById(tagId);
+        QuestionGetDto questionGetDto = questionService.getQuestionById(questionId);
+        if (!tagGetDto.getQuestions().contains(questionGetDto)) {
+            throw new TagNotBeenAddedToQuestionException(tagId, questionId);
         }
-        tag.setQuestions(questions);
-        tagRepository.save(tag);
+        tagGetDto.getQuestions().remove(questionGetDto);
+        tagRepository.save(tagDtoMapper.tagGetDtoToTag(tagGetDto));
     }
 }

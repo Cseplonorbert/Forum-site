@@ -1,18 +1,13 @@
 package com.codecool.Forum.controller;
 
-import com.codecool.Forum.assembler.CommentViewAssembler;
-import com.codecool.Forum.exception.AnswerNotFoundException;
-import com.codecool.Forum.exception.QuestionNotFoundException;
-import com.codecool.Forum.model.Answer;
-import com.codecool.Forum.model.Comment;
-import com.codecool.Forum.model.Question;
-import com.codecool.Forum.model.view.CommentView;
-import com.codecool.Forum.service.AnswerService;
+import com.codecool.Forum.assembler.CommentAssembler;
+import com.codecool.Forum.model.dto.CommentGetDto;
+import com.codecool.Forum.model.dto.CommentPostDto;
 import com.codecool.Forum.service.CommentService;
-import com.codecool.Forum.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,74 +15,51 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
 
     private final CommentService commentService;
-    private final AnswerService answerService;
-    private final QuestionService questionService;
-    private final CommentViewAssembler commentViewAssembler;
+    private final CommentAssembler commentViewAssembler;
 
     @Autowired
     public CommentController(CommentService commentService,
-                             AnswerService answerService,
-                             QuestionService questionService,
-                             CommentViewAssembler commentViewAssembler) {
+                             CommentAssembler commentViewAssembler) {
         this.commentService = commentService;
-        this.answerService = answerService;
-        this.questionService = questionService;
         this.commentViewAssembler = commentViewAssembler;
     }
 
     @GetMapping("/questions/{questionId}/comments")
-    public CollectionModel<EntityModel<CommentView>> getAllByQuestionId(@PathVariable Long questionId) {
-        if (!questionService.existsById(questionId)) {
-            throw new QuestionNotFoundException(questionId);
-        }
+    public CollectionModel<EntityModel<CommentGetDto>> getAllByQuestionId(@PathVariable Long questionId) {
         return commentViewAssembler.toCollectionModel(commentService.getCommentsByQuestionId(questionId));
     }
 
     @PostMapping("/questions/{questionId}/comments")
-    public CollectionModel<EntityModel<CommentView>> addCommentToQuestion(@PathVariable Long questionId,
-                                                                             @RequestBody Comment comment) {
-        Question question = questionService.getQuestionById(questionId);
-        commentService.add(question, comment);
-        return getAllByQuestionId(questionId);
+    public EntityModel<CommentGetDto> addCommentToQuestion(@PathVariable Long questionId,
+                                                           @RequestBody CommentPostDto commentPostDto) {
+        return commentViewAssembler.toModel(commentService.addCommentToQuestion(questionId, commentPostDto));
     }
 
     @GetMapping("/answers/{answerId}/comments")
-    public CollectionModel<EntityModel<CommentView>> getAllByAnswerId(@PathVariable Long answerId) {
-        if(!answerService.existsById(answerId)) {
-            throw new AnswerNotFoundException(answerId);
-        }
+    public CollectionModel<EntityModel<CommentGetDto>> getAllByAnswerId(@PathVariable Long answerId) {
         return commentViewAssembler.toCollectionModel(commentService.getCommentsByAnswerId(answerId));
     }
 
     @PostMapping("/answers/{answerId}/comments")
-    public CollectionModel<EntityModel<CommentView>> addCommentToAnswer(@PathVariable Long answerId,
-                                                                             @RequestBody Comment comment) {
-        Answer answer = answerService.getAnswerById(answerId);
-        commentService.add(answer, comment);
-        return getAllByAnswerId(answerId);
+    public EntityModel<CommentGetDto> addCommentToAnswer(@PathVariable Long answerId,
+                                                         @RequestBody CommentPostDto commentPostDto) {
+        return commentViewAssembler.toModel(commentService.addCommentToAnswer(answerId, commentPostDto));
     }
 
     @GetMapping("/comments/{commentId}")
-    public EntityModel<CommentView> get(@PathVariable Long commentId) {
+    public EntityModel<CommentGetDto> get(@PathVariable Long commentId) {
         return commentViewAssembler.toModel(commentService.getCommentById(commentId));
     }
 
     @PutMapping("/comments/{commentId}")
-    public CollectionModel<EntityModel<CommentView>> update(@PathVariable Long commentId,
-                                                            @RequestParam Comment comment) {
-        comment = commentService.update(commentId, comment);
-        if (!commentService.isBoundedToQuestion(comment)) {
-            return getAllByAnswerId(comment.getAnswer().getId());
-        }
-        return getAllByQuestionId(comment.getQuestion().getId());
+    public EntityModel<CommentGetDto> update(@PathVariable Long commentId,
+                                                            @RequestBody CommentPostDto commentPostDto) {
+        return commentViewAssembler.toModel(commentService.update(commentId, commentPostDto));
     }
 
     @DeleteMapping("/comments/{commentId}")
-    public CollectionModel<EntityModel<CommentView>> delete(@PathVariable Long commentId) {
-        Comment comment = commentService.delete(commentId);
-        if (!commentService.isBoundedToQuestion(comment)) {
-            return getAllByAnswerId(comment.getAnswer().getId());
-        }
-        return getAllByQuestionId(comment.getQuestion().getId());
+    public ResponseEntity<Void> delete(@PathVariable Long commentId) {
+        commentService.delete(commentId);
+        return ResponseEntity.noContent().build();
     }
 }
