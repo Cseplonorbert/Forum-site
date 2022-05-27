@@ -10,7 +10,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "answer")
@@ -27,11 +26,11 @@ public class Answer {
     private Question question;
 
     @OneToMany(mappedBy = "answer", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    @Builder.Default private List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments = new ArrayList<>();
 
     @Column(name = "vote_number")
-    @Builder.Default private int voteNumber = 0;
+    private int voteNumber = 0;
 
     @Column(name = "submission_time")
-    @Builder.Default private LocalDateTime submissionTime = LocalDateTime.now();
+    private LocalDateTime submissionTime = LocalDateTime.now();
 }

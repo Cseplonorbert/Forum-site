@@ -1,15 +1,13 @@
 package com.codecool.Forum.controller;
 
-import com.codecool.Forum.assembler.AnswerViewAssembler;
-import com.codecool.Forum.exception.QuestionNotFoundException;
-import com.codecool.Forum.model.Answer;
-import com.codecool.Forum.model.Question;
-import com.codecool.Forum.model.view.AnswerView;
+import com.codecool.Forum.assembler.AnswerAssembler;
+import com.codecool.Forum.model.dto.AnswerGetDto;
+import com.codecool.Forum.model.dto.AnswerPostDto;
 import com.codecool.Forum.service.AnswerService;
-import com.codecool.Forum.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,61 +15,50 @@ import org.springframework.web.bind.annotation.*;
 public class AnswerController {
 
     private final AnswerService answerService;
-    private final QuestionService questionService;
-    private final AnswerViewAssembler answerViewAssembler;
+    private final AnswerAssembler answerViewAssembler;
 
     @Autowired
     public AnswerController (AnswerService answerService,
-                             QuestionService questionService,
-                             AnswerViewAssembler answerViewAssembler) {
+                             AnswerAssembler answerViewAssembler) {
         this.answerService = answerService;
-        this.questionService = questionService;
         this.answerViewAssembler = answerViewAssembler;
     }
 
     @GetMapping("/questions/{questionId}/answers")
-    public CollectionModel<EntityModel<AnswerView>> getAllAnswersByQuestionId(@PathVariable Long questionId) {
-        if (!questionService.existsById(questionId)) {
-            throw new QuestionNotFoundException(questionId);
-        }
+    public CollectionModel<EntityModel<AnswerGetDto>> getAllAnswersByQuestionId(@PathVariable Long questionId) {
         return answerViewAssembler.toCollectionModel(answerService.getAnswersByQuestionId(questionId));
     }
 
     @PostMapping("/questions/{questionId}/answers")
-    public CollectionModel<EntityModel<AnswerView>> createAnswer(@PathVariable Long questionId,
-                                                                 @RequestBody Answer answer ) {
-        Question question = questionService.getQuestionById(questionId);
-        answerService.add(question, answer);
-        return getAllAnswersByQuestionId(questionId);
+    public EntityModel<AnswerGetDto> createAnswer(@PathVariable Long questionId,
+                                                                 @RequestBody AnswerPostDto answerPostDto ) {
+        return answerViewAssembler.toModel(answerService.add(questionId, answerPostDto));
     }
 
     @GetMapping("/answers/{answerId}")
-    public EntityModel<AnswerView> getAnswerById(@PathVariable Long answerId) {
+    public EntityModel<AnswerGetDto> getAnswerById(@PathVariable Long answerId) {
         return answerViewAssembler.toModel(answerService.getAnswerById(answerId));
     }
 
     @DeleteMapping("/answers/{answerId}")
-    public CollectionModel<EntityModel<AnswerView>> deleteAnswer(@PathVariable Long answerId) {
-        Question question = answerService.deleteAnswer(answerId);
-        return getAllAnswersByQuestionId(question.getId());
+    public ResponseEntity<Void> deleteAnswer(@PathVariable Long answerId) {
+        answerService.deleteAnswer(answerId);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/answers/{answerId}")
-    public CollectionModel<EntityModel<AnswerView>> update(@PathVariable Long answerId,
-                                                           @RequestParam Answer answer) {
-        Question question = answerService.update(answerId, answer);
-        return getAllAnswersByQuestionId(question.getId());
+    public EntityModel<AnswerGetDto> update(@PathVariable Long answerId,
+                                                           @RequestBody AnswerPostDto answerPostDto) {
+        return answerViewAssembler.toModel(answerService.update(answerId, answerPostDto));
     }
 
     @PostMapping("/answers/{answerId}/up_vote")
-    public CollectionModel<EntityModel<AnswerView>> upVote(@PathVariable Long answerId) {
-        Question question = answerService.upVote(answerId);
-        return getAllAnswersByQuestionId(question.getId());
+    public EntityModel<AnswerGetDto> upVote(@PathVariable Long answerId) {
+        return answerViewAssembler.toModel(answerService.upVote(answerId));
     }
 
     @PostMapping("/answers/{answerId}/down_vote")
-    public CollectionModel<EntityModel<AnswerView>> downVote(@PathVariable Long answerId) {
-        Question question = answerService.downVote(answerId);
-        return getAllAnswersByQuestionId(question.getId());
+    public EntityModel<AnswerGetDto> downVote(@PathVariable Long answerId) {
+        return answerViewAssembler.toModel(answerService.downVote(answerId));
     }
 }
