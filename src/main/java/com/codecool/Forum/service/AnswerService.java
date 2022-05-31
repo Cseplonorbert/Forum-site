@@ -1,6 +1,7 @@
 package com.codecool.Forum.service;
 
 import com.codecool.Forum.exception.AnswerNotFoundException;
+import com.codecool.Forum.exception.QuestionNotFoundException;
 import com.codecool.Forum.mapper.AnswerDtoMapper;
 import com.codecool.Forum.model.Answer;
 import com.codecool.Forum.model.Vote;
@@ -43,6 +44,9 @@ public class AnswerService {
     }
 
     public List<AnswerGetDto> getAnswersByQuestionId(Long questionId) {
+        if (!questionService.existsById(questionId)) {
+            throw new QuestionNotFoundException(questionId);
+        }
         return answerRepository.findAnswersByQuestionId(questionId)
                 .stream().map(answerDtoMapper::answerToAnswerGetDto).collect(Collectors.toList());
     }
