@@ -1,6 +1,7 @@
 package com.codecool.Forum.service;
 
 import com.codecool.Forum.exception.CommentNotFoundException;
+import com.codecool.Forum.exception.QuestionNotFoundException;
 import com.codecool.Forum.mapper.CommentDtoMapper;
 import com.codecool.Forum.model.Comment;
 import com.codecool.Forum.model.dto.AnswerGetDto;
@@ -44,6 +45,9 @@ public class CommentService {
     }
 
     public List<CommentGetDto> getCommentsByQuestionId(Long questionId) {
+        if (!questionService.existsById(questionId)) {
+            throw new QuestionNotFoundException(questionId);
+        }
         return commentRepository.findCommentsByQuestionId(questionId)
                 .stream().map(commentDtoMapper::commentToCommentGetDto).collect(Collectors.toList());
     }
