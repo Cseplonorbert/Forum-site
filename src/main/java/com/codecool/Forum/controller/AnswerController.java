@@ -10,6 +10,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api")
 public class AnswerController {
@@ -31,7 +33,7 @@ public class AnswerController {
 
     @PostMapping("/questions/{questionId}/answers")
     public EntityModel<AnswerGetDto> createAnswer(@PathVariable Long questionId,
-                                                                 @RequestBody AnswerPostDto answerPostDto ) {
+                                                                 @Valid @RequestBody AnswerPostDto answerPostDto ) {
         return answerViewAssembler.toModel(answerService.add(questionId, answerPostDto));
     }
 
@@ -48,7 +50,7 @@ public class AnswerController {
 
     @PutMapping("/answers/{answerId}")
     public EntityModel<AnswerGetDto> update(@PathVariable Long answerId,
-                                                           @RequestBody AnswerPostDto answerPostDto) {
+                                                           @Valid @RequestBody AnswerPostDto answerPostDto) {
         return answerViewAssembler.toModel(answerService.update(answerId, answerPostDto));
     }
 

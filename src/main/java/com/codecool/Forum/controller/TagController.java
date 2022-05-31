@@ -9,6 +9,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api")
 public class TagController {
@@ -27,7 +29,7 @@ public class TagController {
     }
 
     @PostMapping("/questions/{questionId}/tags")
-    public EntityModel<TagGetDto> add(@PathVariable Long questionId, @RequestBody TagPostDto tagPostDto) {
+    public EntityModel<TagGetDto> add(@PathVariable Long questionId, @Valid @RequestBody TagPostDto tagPostDto) {
         return tagViewAssembler.toModel(tagService.add(questionId, tagPostDto));
     }
 
