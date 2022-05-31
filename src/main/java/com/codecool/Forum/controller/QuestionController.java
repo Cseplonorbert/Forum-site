@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api")
 public class QuestionController {
@@ -59,7 +61,7 @@ public class QuestionController {
     }
 
     @PostMapping("/questions/add")
-    public ResponseEntity<EntityModel<QuestionGetDto>> add(@RequestBody QuestionPostDto questionPostDto) {
+    public ResponseEntity<EntityModel<QuestionGetDto>> add(@Valid @RequestBody QuestionPostDto questionPostDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(questionAssembler
@@ -68,7 +70,7 @@ public class QuestionController {
 
     @PutMapping("/questions/{id}")
     public ResponseEntity<EntityModel<QuestionGetDto>> update(@PathVariable Long id,
-                                                              @RequestBody QuestionPostDto questionPostDto) {
+                                                              @Valid @RequestBody QuestionPostDto questionPostDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(questionAssembler

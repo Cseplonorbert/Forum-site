@@ -10,6 +10,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api")
 public class CommentController {
@@ -31,7 +33,7 @@ public class CommentController {
 
     @PostMapping("/questions/{questionId}/comments")
     public EntityModel<CommentGetDto> addCommentToQuestion(@PathVariable Long questionId,
-                                                           @RequestBody CommentPostDto commentPostDto) {
+                                                           @Valid @RequestBody CommentPostDto commentPostDto) {
         return commentViewAssembler.toModel(commentService.addCommentToQuestion(questionId, commentPostDto));
     }
 
@@ -42,7 +44,7 @@ public class CommentController {
 
     @PostMapping("/answers/{answerId}/comments")
     public EntityModel<CommentGetDto> addCommentToAnswer(@PathVariable Long answerId,
-                                                         @RequestBody CommentPostDto commentPostDto) {
+                                                         @Valid @RequestBody CommentPostDto commentPostDto) {
         return commentViewAssembler.toModel(commentService.addCommentToAnswer(answerId, commentPostDto));
     }
 
@@ -53,7 +55,7 @@ public class CommentController {
 
     @PutMapping("/comments/{commentId}")
     public EntityModel<CommentGetDto> update(@PathVariable Long commentId,
-                                                            @RequestBody CommentPostDto commentPostDto) {
+                                                            @Valid @RequestBody CommentPostDto commentPostDto) {
         return commentViewAssembler.toModel(commentService.update(commentId, commentPostDto));
     }
 
